@@ -6,5 +6,5 @@ class Document:
     def build_terms(self):
         self.Terms = {}
         print "nkjnkj"
-
+        print "cds"
         
