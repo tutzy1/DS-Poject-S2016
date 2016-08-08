@@ -7,4 +7,5 @@ class Document:
         self.Terms = {}
         print "nkjnkj"
         print "cds"
+        print"asd"
         
