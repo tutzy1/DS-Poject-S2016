@@ -273,6 +273,7 @@ class IndexEnvironment:
         """
         return len(self.IStems)
 
+
 Index = IndexEnvironment()
 Index.addIndex("C:/Users/Ziv/Desktop/test.xml")
 #**************----tests---******************
