@@ -118,7 +118,7 @@ class IndexEnvironment:
         :return: the function breaks the words in the text and adds it to the Doc + updates the Index
         """
         Text = str(Text)
-        TextVec = re.split('\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]', Text)
+        TextVec = re.split("\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]|(?='s)|[']", Text)
         TextVec = filter(None, TextVec)
         for i in range(len(TextVec)) :
             term = TextVec[i]
