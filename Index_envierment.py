@@ -71,7 +71,7 @@ class IndexEnvironment:
         tree = ET.parse(f)
         root = tree.getroot()
         for DOC in root.findall('DOC'):
-            Doc_ID = DOC.find('DOCNO').text
+            Doc_ID = (DOC.find('DOCNO').text).strip()
             Text = DOC.find('TEXT').text
             if self.Doc_Exists_In_Index(Doc_ID):
                 raise Exception("the doc titeled -'", Doc_ID, "' is already inside the index")
@@ -275,7 +275,7 @@ class IndexEnvironment:
 
 
 Index = IndexEnvironment()
-Index.addIndex("C:/Users/Ziv/Desktop/test.xml")
+Index.addIndex("C:/Users/Ziv/Desktop/test1.xml")
 #**************----tests---******************
 #try:
  #   Index.getDocuments(['hey','123','zubi'])
@@ -283,11 +283,11 @@ Index.addIndex("C:/Users/Ziv/Desktop/test.xml")
  #   print(e)
 #*********************************************
 #for keys,values in Index.DocIndex.items():
- #   print(keys)
+#    print(keys)
 #for keys,values in Index.DocIndex['hey'].Terms.items():
 #   print(keys,values)
 #print ('123:')
-#for keys, values in Index.DocIndex['123'].Terms.items():
+#for keys, values in Index.DocIndex[' 999 '].Terms.items():
 #   print(keys, values)
 #print ('stems:')
 #for keys, values in Index.DocIndex['hey'].Stems.items():
