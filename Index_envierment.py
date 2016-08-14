@@ -287,7 +287,7 @@ Index.addIndex("C:/Users/Ziv/Desktop/test1.xml")
 #for keys,values in Index.DocIndex['hey'].Terms.items():
 #   print(keys,values)
 #print ('123:')
-#for keys, values in Index.DocIndex[' 999 '].Terms.items():
+#for keys, values in Index.DocIndex['999'].Terms.items():
 #   print(keys, values)
 #print ('stems:')
 #for keys, values in Index.DocIndex['hey'].Stems.items():
