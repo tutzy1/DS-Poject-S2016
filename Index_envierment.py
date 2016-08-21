@@ -112,7 +112,6 @@ class IndexEnvironment:
 
     def Break_Text_Into_Doc(self, Doc, Text):
         """
-        :param Index: type - IndexEnvironment
         :param Doc: type - Document
         :param Text: type - string
         :return: the function breaks the words in the text and adds it to the Doc + updates the Index
@@ -162,7 +161,7 @@ class IndexEnvironment:
                 result.append(temp)
             return result
         else :
-            raise Exception('metadata -',metaData,' does not exists')
+            raise Exception('metadata -',metaData,' does not exists (from getDocumentsMetadata)')
 
     def count(self):
         """
