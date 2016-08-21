@@ -121,7 +121,7 @@ class IndexEnvironment:
         TextVec = filter(None, TextVec)
         for i in range(len(TextVec)) :
             term = TextVec[i]
-            st = PorterStemmer()
+            st = PorterStemmer() # Is it necessary? Doesn't it create new object of the class in each iteration?
             stem = st.stem(term)
             Doc.addTerm(term, i)
             Doc.addStem(stem, i)
