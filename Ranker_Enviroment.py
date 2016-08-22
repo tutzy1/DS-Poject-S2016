@@ -42,6 +42,10 @@ class Query:
         return self.Text
 
     def Tf_For_Stem(self, stem):
+        """
+        :param stem: type - string - a stem
+        :return: the Tf value of the stem in the query (int)
+        """
         return self.Stems[stem].size
 
     def Break_Text_Into_Query(self, Text):

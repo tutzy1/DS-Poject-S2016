@@ -45,6 +45,10 @@ class Document:
         return self.Text
 
     def Tf_For_Stem(self, stem):
+        """
+        :param stem: type - string - a stem
+        :return: the Tf value of the stem in the Doc (int)
+        """
         return self.Stems[stem].size
 
 class IndexEnvironment:
