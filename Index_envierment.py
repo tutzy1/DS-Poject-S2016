@@ -2,6 +2,10 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 import re
+from math import log10
+from math import isnan
+from scipy import spatial
+import Ranker_Enviroment # need to see how to make it work
 
 class Document:
     def __init__(self, Doc_ID, Text):
@@ -39,6 +43,9 @@ class Document:
         :return: returns the original Text that was on the input of the doc
         """
         return self.Text
+
+    def Tf_For_Stem(self, stem):
+        return self.Stems[stem].size
 
 class IndexEnvironment:
 
@@ -272,9 +279,62 @@ class IndexEnvironment:
         """
         return len(self.IStems)
 
+    def Idf_For_Stem(self, stem):
+        """
+        :param stem: type - string - a stem
+        :return: the Idf rank of the stem in the Index
+        :exceptions: if the stem isn't inside the index trows an exception (from documentStemCount function)
+        """
+        N = self.documentCount()
+        n = self.documentStemCount(stem)
+        return log10(float(N)/n)
+
+    def runQuery(self, query, limit = 0):
+        """
+        :param query: type - string
+        :param limit: type - int (positive) - without input the value is 0
+        :return: returns a list of Documents that fits the query the most according to cosine similarity the length
+        of the list is limit and if limit is 0 the length is the amount of Documents in the Index
+        :exceptions: trows an exception if the query is empty (or contains only spaces) and if the input
+        limit is bigger then the amount of Documents inside the Index
+        # note for exception - the func uses the Idf_For_Stem function that can throw an exception (not in this case
+        but if changes are made)
+        """
+        if not query.strip():
+            raise Exception('the query is empty')
+        elif limit > self.documentCount():
+            raise Exception('limit is bigger then amount of documents inside the Index')
+        InputQuery = Query('999999',query) # creates a temp Query without updating Ranker
+        InputQuery.Break_Text_Into_Query(query)
+        ranklist = []
+        for key in self.DocIndex:
+            query_tfidf = np.array(0) # the zero just for initialize, doesn't have effect on result
+            doc_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
+            for key1 in InputQuery.Stems :
+                if key1 in self.DocIndex[key].Stems: # creats the Tf_Idf vector only for words that are inside the query and Doc
+                    idf = self.Idf_For_Stem(key1)
+                    query_tfidf = np.append(query_tfidf, InputQuery.Tf_For_Stem(key1)*idf)
+                    doc_tfidf = np.append(doc_tfidf, self.DocIndex[key].Tf_For_Stem(key1)*idf)
+            if np.count_nonzero(doc_tfidf) == 0 or  np.count_nonzero(query_tfidf) == 0:# checks there's no division by 0 in cosine calculation
+                CosinSimilarity = 0 # need to find out if exception is needed
+            else:
+                CosinSimilarity =  1.0 - spatial.distance.cosine(doc_tfidf, query_tfidf)
+            if isnan(CosinSimilarity):
+                CosinSimilarity = 0
+            ranklist.append((self.DocIndex[key], CosinSimilarity))
+        ranklist.sort(key=lambda tup: tup[1], reverse=True) # sorts in reverse order according to CosinSimilarity
+        resultlist = []
+        if limit == 0 :
+            for i in range(len(ranklist)):
+                resultlist.append(ranklist[i][0])
+            return resultlist
+        else:
+            for i in range(limit):
+                resultlist.append(ranklist[i][0])
+            return resultlist
 
 Index = IndexEnvironment()
-Index.addIndex("C:/Users/Ziv/Desktop/test1.xml")
+Index.addIndex("C:/Users/Ziv/Desktop/test.xml")
 #**************----tests---******************
 #try:
  #   Index.getDocuments(['hey','123','zubi'])
@@ -336,4 +396,8 @@ Index.addIndex("C:/Users/Ziv/Desktop/test1.xml")
 #************************************************************
 #print Index.UniqueTermsInIndex()
 #print Index.UniqueStemsInIndex()
+#***********************************************************
+#list = Index.runQuery('hello in haifa i walk" very am')
+#for i in range(len(list)):
+#    print list[i].Doc_ID
 
