@@ -56,13 +56,32 @@ class RankerEnvironment:
             Query.addStem(stem, i)
         return
 
+    def getQueriesMetadata(self, metaData):
+        """
+        :param metaData: type - string - either 'number' or 'text' (not capital sensitive)
+        :return: returns a list of the required metadata from all the Querys in the Ranker
+        :exceptions: if the metadata isn't number or text trows an Exception
+        """
+        result = []
+        if metaData.lower() == 'number':
+            for key in self.QueryIndex:
+                result.append(key)
+            return result
+        elif metaData.lower() == 'text':
+            for key in self.QueryIndex:
+                temp = self.QueryIndex[key].RestoreText()
+                result.append(temp)
+            return result
+        else:
+            raise Exception('metadata -', metaData, ' does not exists (from getQueriesMetadata)')
+
     def runQuery(self, queryID, limit = 0):
         """
         :param queryID: type - string - the ID of the query
         :param limit: type - int
-        :return: the function runs the query with the givven qeuryID, and output to
+        :return: the function runs the query with the given qeuryID, and output to
         the screen the rank of the documents
         """
         if queryID in self.QueriesDict:
             query = self.QueriesDict[qeuryID]
-            N = self.
+            N = self.Index.documentCount()
