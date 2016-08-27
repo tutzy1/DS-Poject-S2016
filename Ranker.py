@@ -1,6 +1,8 @@
 import Index_envierment
 import numpy as np
 from nltk.stem.porter import PorterStemmer
+from math import pow
+from math import sqrt
 
 class Query:
     def __init__(self, Query_ID, Text):
@@ -34,10 +36,11 @@ class Query:
         return
 
 
+
 class RankerEnvironment:
     def __init__(self, Index):
-        self.QueriesDict = {}
-        self.Index = Index
+        self.QueriesDict = {} # dictionary - keys: queryID (strings) , values - Query
+        self.Index = Index # the index for this ranker environment
 
     def Break_Text_Into_Query(self, Query, Text):
         """
@@ -75,6 +78,29 @@ class RankerEnvironment:
         else:
             raise Exception('metadata -', metaData, ' does not exists (from getQueriesMetadata)')
 
+    def Calc_Similarity(self, doc, query):
+        """
+        :param doc: type - Document - the document to calculate similarity with
+        :param query: type - Query - the query to calculate similarity with
+        :return: the method calculates and return the similarity value between the given Document
+                 and Query according to cosin similarity metric.
+                 for simplicity in the documentation - A represent the vector of the TfIdf values for the document stems,
+                 B for the qeury.
+        """
+        if self.Index.Tf_Idf_Flag == 0:
+            self.Index.TfIdfUpdate()
+        sum = 0 # sum A_i*B_i
+        sum_A_i_s = 0 # sum of A_i squared
+        sum_B_i_s = 0  # sum of B_i squared
+        for stem in query.Stems:
+            q_idf = query.Stems[stem].size()
+            if stem in doc.Stems:
+                sum = sum + q_idf*doc.Tf_Idf_Ranks[stem]
+            sum_B_i_s = sum_B_i_s + pow(q_idf,2)
+        return (sum)
+
+
+
     def runQuery(self, queryID, limit = 0):
         """
         :param queryID: type - string - the ID of the query
@@ -82,6 +108,4 @@ class RankerEnvironment:
         :return: the function runs the query with the given qeuryID, and output to
         the screen the rank of the documents
         """
-        if queryID in self.QueriesDict:
-            query = self.QueriesDict[qeuryID]
-            N = self.Index.documentCount()
+
