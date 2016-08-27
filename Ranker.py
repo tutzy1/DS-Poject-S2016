@@ -3,6 +3,9 @@ import numpy as np
 from nltk.stem.porter import PorterStemmer
 from math import pow
 from math import sqrt
+from numpy import linalg as LA
+
+
 
 class Query:
     def __init__(self, Query_ID, Text):
@@ -90,13 +93,11 @@ class RankerEnvironment:
         if self.Index.Tf_Idf_Flag == 0:
             self.Index.TfIdfUpdate()
         sum = 0 # sum A_i*B_i
-        sum_A_i_s = 0 # sum of A_i squared
-        sum_B_i_s = 0  # sum of B_i squared
         for stem in query.Stems:
             q_idf = query.Stems[stem].size()
             if stem in doc.Stems:
                 sum = sum + q_idf*doc.Tf_Idf_Ranks[stem]
-            sum_B_i_s = sum_B_i_s + pow(q_idf,2)
+
         return (sum)
 
 

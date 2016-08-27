@@ -7,6 +7,8 @@ from math import isnan
 from math import pow
 from math import sqrt
 from scipy import spatial
+from numpy import linalg as LA
+
 import Ranker_Enviroment # need to see how to make it work
 
 class Document:
@@ -16,9 +18,8 @@ class Document:
         self.Stems = {} # dictionery - keys: stems (strings) , values - arreys of positions(int)
         self.Text = Text # original doc's text
         self.Tf_Idf_Ranks = {} # dictionary - keys: stems (strings) , values - Tf_Idf rank for the stem in the document
-        self.sqrt_of_sum = 0 # sqrt of the sum of all the squared TfIdf values - helps for the similarity
+        self.A_2norm = 0 # 2-norm of the TfIdf vector - helps for the similarity
                              # calculation (the initialized value isn't relevant)
-
     def addTerm(self, Term, position):
         """
         :param Term: type - string - a word from text
@@ -349,14 +350,13 @@ class IndexEnvironment:
         :return: this method updates the TfIdf values of all the stems for all the documents in the index.
                   at the end it update the relevant flag.
         """
-        sum_of_squared = 0 # sum of the squared TfIdf values
         for doc in self.DocIndex.values():
             for stem in doc.Stems:
                 tf = doc.Tf_For_Stem(stem)
                 idf = self.Idf_For_Stem(stem)
                 doc.Tf_Idf_Ranks[stem] = tf*idf
                 sum_of_squared = sum_of_squared + pow(tf*idf,2)
-            doc.sqrt_of_sum = sqrt(sum_of_squared)
+            doc.A_2norm = LA.norm(doc.Tf_Idf_Ranks.values())
         self.Tf_Idf_Flag = 1
 
 
