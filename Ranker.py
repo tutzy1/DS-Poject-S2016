@@ -1,3 +1,4 @@
+import xml.etree.ElementTree as ET
 import Index_envierment
 import numpy as np
 from nltk.stem.porter import PorterStemmer
@@ -38,12 +39,51 @@ class Query:
             self.Stems[Stem] = np.array(position)
         return
 
+    def RestoreText(self):
+        """
+        :return: returns the original Text that was on the input of the query
+        """
+        return self.Text
+
 
 
 class RankerEnvironment:
     def __init__(self, Index):
         self.QueriesDict = {} # dictionary - keys: queryID (strings) , values - Query
         self.Index = Index # the index for this ranker environment
+
+    def query_Exists_In_Dictionary(self, Query_ID):
+        """
+        :param Query_ID: type - string/int - a Query's Query_ID
+        :return: True if the query already exists in the dictionary and False if not
+        """
+        if Query_ID in self.QueriesDict :
+            return True
+        else:
+            return False
+
+    def loadQueries(self, pathname):
+        """
+        :param pathname: a path to a queries XML file
+        :return: the function opens the file and saves the queries to the in the dictionary QueriesDict
+        :exceptions: throws exceptions if one of the Queries in the file from pathname already exists in the dictionary
+        or if the file can't be opened
+        """
+        try:
+            f = open(pathname, 'r')
+        except (OSError, IOError) as e:
+            raise Exception("file from -'",pathname,"'is not found")
+        tree = ET.parse(f)
+        root = tree.getroot()
+        for Quer in root.findall('query'):
+            Query_ID = (Quer.find('number').text).strip()
+            text = Quer.find('text').text
+            if self.Query_Exists_In_Dictionary(Query_ID):
+                raise Exception("the query titeled -'", Query_ID, "' is already inside the dictionary")
+            temp = Query(Query_ID, text)
+            self.Break_Text_Into_Query(temp, text)
+        f.close()
+        return
 
     def Break_Text_Into_Query(self, Query, Text):
         """
@@ -70,12 +110,12 @@ class RankerEnvironment:
         """
         result = []
         if metaData.lower() == 'number':
-            for key in self.QueryIndex:
+            for key in self.QueriesDict:
                 result.append(key)
             return result
         elif metaData.lower() == 'text':
-            for key in self.QueryIndex:
-                temp = self.QueryIndex[key].RestoreText()
+            for key in self.QueriesDict:
+                temp = self.QueriesDict[key].RestoreText()
                 result.append(temp)
             return result
         else:
@@ -107,6 +147,45 @@ class RankerEnvironment:
         :param queryID: type - string - the ID of the query
         :param limit: type - int
         :return: the function runs the query with the given qeuryID, and output to
-        the screen the rank of the documents
+        the screen the rank of the documents (up to |limit| documents) in "TREC 6 columns" format
+        exceptions: throws an exception if the given queryID does not exist in the dictionary,
+                    or a relevant exception if the query matching the given queryID is empty.
         """
+        if not self.query_Exists_In_Dictionary(queryID):
+            raise Exception("the query titeled -'", queryID, "' does not exist in dictionary")
+        else:
+            query = self.QueriesDict[queryID].RestoreText()
+            result = self.get_Result_In_TREC6Columns(queryID, query, limit)
+            print result
+        return
+
+    def get_Result_In_TREC6Columns(self, queryID, query, limit = 0):
+        """
+        :param queryID: type - int
+        :param query: type - string - the query's text
+        :param limit: type - int - maximum amount of documents in the result
+        :return: return the result of the given query in a "TREC 6 columns" formatted string
+        exceptions: throws an exception if the query is empty.
+        """
+        documents = self.Index.runQuery(query, limit)
+        i = 1
+        result = ""
+        for tup in documents:
+            result = result + "{0} {1} {2} {3} {4} {5}\n".format(queryID, "Q0", tup[0], i, tup[1], "col6")
+            i = i + 1
+        return result
+
+    def runQueries(self, limit = 0):
+        """
+        :param limit: type - int - maximum amount of documents in the result of a single query
+        :return: for each query in the dictionary - rank all the documents in the Index accordingly
+                 and print the result for each query (up to |limit| documents per query) to screen
+                 in
+                 "TREC 6 columns" format.
+        exceptions: throws an exception if one of the queries in the dictionary is empty.
+        """
+        for queryID in self.QueriesDict:
+            self.runQuery(queryID, limit)
+        return
+
 
