@@ -133,41 +133,88 @@ class RankerEnvironment:
         if self.Index.Tf_Idf_Flag == 0:
             self.Index.TfIdfUpdate()
         sum = 0 # sum A_i*B_i
+        B_2norm = 0 #the 2nd norm of the query TfIdf vector
         for stem in query.Stems:
             q_idf = query.Stems[stem].size()
+            B_2norm = B_2norm + pow(q_idf,2)
             if stem in doc.Stems:
                 sum = sum + q_idf*doc.Tf_Idf_Ranks[stem]
+        sim = float(sum)/float(doc.A_2norm*sqrt(B_2norm))
+        return sim
 
-        return (sum)
-
-
-
-    def runQuery(self, queryID, limit = 0):
+    def Rank(self, query, limit = 0):
         """
-        :param queryID: type - string - the ID of the query
-        :param limit: type - int
-        :return: the function runs the query with the given qeuryID, and output to
-        the screen the rank of the documents (up to |limit| documents) in "TREC 6 columns" format
-        exceptions: throws an exception if the given queryID does not exist in the dictionary,
-                    or a relevant exception if the query matching the given queryID is empty.
+        :param query: type - Query - the query to rank with
+        :param limit: type - int - the number of the top ranked docs to return
+        :return: list with the top ranked docs, each is represented by tuple (doc_ID,rank)
         """
-        if not self.query_Exists_In_Dictionary(queryID):
-            raise Exception("the query titeled -'", queryID, "' does not exist in dictionary")
+        if self.Index.Tf_Idf_Flag == 0:
+            self.Index.TfIdfUpdate()
+        ranklist = []
+        q_stems = query.Stems.keys()
+        query_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
+        for stem in q_stems:
+            query_tfidf = np.append(query_tfidf, query.Stems[stem].size())
+        for doc in self.Index.DocIndex:
+            doc_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
+            for stem in q_stems:
+                if stem in doc.Stems:
+                    doc_tfidf = np.append(doc_tfidf, doc.Tf_Idf_Ranks[stem])
+                else:
+                    doc_tfidf = np.append(doc_tfidf, 0)
+            if np.count_nonzero(doc_tfidf) == 0 or np.count_nonzero(query_tfidf) == 0:  # checks there's no division by 0 in cosine calculation
+                CosinSimilarity = 0  # need to find out if exception is needed
+            else:
+                CosinSimilarity = 1.0 - spatial.distance.cosine(doc_tfidf, query_tfidf)
+            if isnan(CosinSimilarity):
+                CosinSimilarity = 0
+            ranklist.append((doc.Doc_ID, CosinSimilarity))
+        ranklist.sort(key=lambda tup: tup[1], reverse=True)  # sorts in reverse order according to CosinSimilarity
+        if limit == 0:
+            return ranklist
         else:
-            query = self.QueriesDict[queryID].RestoreText()
-            result = self.get_Result_In_TREC6Columns(queryID, query, limit)
-            print result
+            return ranklist[:limit]
+
+    def runQuery(self, queryID = None, query = None, pathnameToSave = None, limit = 0):
+        """
+        :param queryID: type - string - the ID of the query (optional)
+        :param query: type - string - the query in string (if queryID wasn't provided)
+        :param pathnameToSave: type - string - the path to save the result (optional)
+        :param fileToWrite: type - file - the file to add the result to (optional)
+        :param limit: type - int - the number of the top ranked docs to output (optional)
+        :return: the function runs the query with the given qeuryID or string, and output to
+        the screen or to a file if a path was provided the rank of the documents
+        (up to |limit| documents) in "TREC 6 columns" format
+        exceptions: throws an exception if the given queryID does not exist in the dictionary,
+                    and if query wasn't provided at all (not as queryID and not as string).
+        """
+        if queryID == None:
+            if query == None:
+                raise  Exception("the query wasn't provided")
+            else:
+                temp_query = Query('999999',query) # creates a temp Query without updating Ranker
+        elif self.query_Exists_In_Dictionary(queryID):
+            temp_query = self.QueriesDict[queryID]
+        else:
+            raise Exception("the query titeled -'", queryID, "' does not exist in dictionary")
+        result = self.Rank(temp_query,limit)
+        output = self.get_Result_In_TREC6Columns(result, temp_query.Query_ID)
+        if pathnameToSave != None:
+            with open(pathnameToSave, 'w') as f:
+                f.write(result)
+            return
+        else:
+            print result + "\n"
         return
 
-    def get_Result_In_TREC6Columns(self, queryID, query, limit = 0):
+    def get_Result_In_TREC6Columns(self, documents, queryID):
         """
         :param queryID: type - int
         :param query: type - string - the query's text
         :param limit: type - int - maximum amount of documents in the result
-        :return: return the result of the given query in a "TREC 6 columns" formatted string
-        exceptions: throws an exception if the query is empty.
+        :return: convert the given list of documents (represented by tuples of (docID, rank))
+         to a "TREC 6 columns" formatted string
         """
-        documents = self.Index.runQuery(query, limit)
         i = 1
         result = ""
         for tup in documents:
@@ -175,17 +222,26 @@ class RankerEnvironment:
             i = i + 1
         return result
 
-    def runQueries(self, limit = 0):
+    def runQueries(self, pathnameToSave = None, limit = 0):
         """
         :param limit: type - int - maximum amount of documents in the result of a single query
+        :param pathnameToSave: type - string - the path to save the output at (optional)
         :return: for each query in the dictionary - rank all the documents in the Index accordingly
                  and print the result for each query (up to |limit| documents per query) to screen
                  in
                  "TREC 6 columns" format.
         exceptions: throws an exception if one of the queries in the dictionary is empty.
         """
-        for queryID in self.QueriesDict:
-            self.runQuery(queryID, limit)
+        if pathnameToSave != None:
+            with open(pathnameToSave, 'w') as f:
+                for queryID in self.QueriesDict:
+                    result = self.Rank(self.QueriesDict[queryID])
+                    f.write(self.get_Result_In_TREC6Columns(result, queryID) + "\n")
+        else:
+            for queryID in self.QueriesDict:
+                result = self.Rank(self.QueriesDict[queryID])
+                print result + "\n"
+        self.QueriesDict = {} # check if need to be empty
         return
 
 
