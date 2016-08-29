@@ -334,6 +334,7 @@ class IndexEnvironment:
                 CosinSimilarity = 0
             ranklist.append((self.DocIndex[key], CosinSimilarity))
         ranklist.sort(key=lambda tup: tup[1], reverse=True) # sorts in reverse order according to CosinSimilarity
+        """
         resultlist = []
         if limit == 0 :
             for i in range(len(ranklist)):
@@ -342,7 +343,8 @@ class IndexEnvironment:
         else:
             for i in range(limit):
                 resultlist.append(ranklist[i][0])
-            return resultlist
+            return resultlist"""
+        return ranklist
 
     def TfIdfUpdate(self):
         """
