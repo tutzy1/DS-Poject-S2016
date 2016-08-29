@@ -8,7 +8,6 @@ from math import pow
 from math import sqrt
 from scipy import spatial
 from numpy import linalg as LA
-
 import Ranker_Enviroment # need to see how to make it work
 
 class Document:
