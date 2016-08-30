@@ -17,8 +17,7 @@ class Document:
         self.Stems = {} # dictionery - keys: stems (strings) , values - arreys of positions(int)
         self.Text = Text # original doc's text
         self.Tf_Idf_Ranks = {} # dictionary - keys: stems (strings) , values - Tf_Idf rank for the stem in the document
-        self.A_2norm = 0 # 2-norm of the TfIdf vector - helps for the similarity
-                             # calculation (the initialized value isn't relevant)
+
     def addTerm(self, Term, position):
         """
         :param Term: type - string - a word from text
@@ -95,6 +94,7 @@ class IndexEnvironment:
                 raise Exception("the doc titeled -'", Doc_ID, "' is already inside the index")
             temp = Document(Doc_ID, Text)
             self.Break_Text_Into_Doc(temp, Text)
+        self.Tf_Idf_Flag = 0
         f.close()
         return
 
@@ -316,7 +316,7 @@ class IndexEnvironment:
         elif limit > self.documentCount():
             raise Exception('limit is bigger then amount of documents inside the Index')
         InputQuery = Query('999999',query) # creates a temp Query without updating Ranker
-        InputQuery.Break_Text_Into_Query(query)
+        """
         ranklist = []
         for key in self.DocIndex:
             query_tfidf = np.array(0) # the zero just for initialize, doesn't have effect on result
@@ -334,6 +334,10 @@ class IndexEnvironment:
                 CosinSimilarity = 0
             ranklist.append((self.DocIndex[key], CosinSimilarity))
         ranklist.sort(key=lambda tup: tup[1], reverse=True) # sorts in reverse order according to CosinSimilarity
+        resultlist = []
+        """
+        ranker = RankerEnvironment(self)
+        ranklist = ranker.Rank(InputQuery, limit)
         resultlist = []
         if limit == 0 :
             for i in range(len(ranklist)):
@@ -354,7 +358,6 @@ class IndexEnvironment:
                 tf = doc.Tf_For_Stem(stem)
                 idf = self.Idf_For_Stem(stem)
                 doc.Tf_Idf_Ranks[stem] = tf*idf
-            doc.A_2norm = LA.norm(doc.Tf_Idf_Ranks.values()) #maybe unnecessary
         self.Tf_Idf_Flag = 1
         return
 
