@@ -4,10 +4,7 @@ from nltk.stem.porter import PorterStemmer
 import re
 from math import log10
 from math import isnan
-from math import pow
-from math import sqrt
 from scipy import spatial
-from numpy import linalg as LA
 import Ranker_Enviroment # need to see how to make it work
 
 class Document:
@@ -16,9 +13,7 @@ class Document:
         self.Terms = {} # dictionery - keys: terms (strings) , values - arreys of positions(int)
         self.Stems = {} # dictionery - keys: stems (strings) , values - arreys of positions(int)
         self.Text = Text # original doc's text
-        self.Tf_Idf_Ranks = {} # dictionary - keys: stems (strings) , values - Tf_Idf rank for the stem in the document
-        self.A_2norm = 0 # 2-norm of the TfIdf vector - helps for the similarity
-                             # calculation (the initialized value isn't relevant)
+
     def addTerm(self, Term, position):
         """
         :param Term: type - string - a word from text
@@ -56,14 +51,12 @@ class Document:
         """
         return self.Stems[stem].size
 
-
 class IndexEnvironment:
 
     def __init__(self):
         self.ITerms = {} # dictionery - keys: terms (strings) , values - arreys of Doc_IDs
         self.IStems = {} # dictionery - keys: terms (strings) , values - arreys of Doc_IDs
         self.DocIndex = {} # dictionery - keys: Doc_IDs , values - Documents
-        self.Tf_Idf_Flag = 0 # flag that indicates whether the TfIdf values in this index is up to date
 
     def Doc_Exists_In_Index(self, Doc_ID):
         """
@@ -342,23 +335,7 @@ class IndexEnvironment:
         else:
             for i in range(limit):
                 resultlist.append(ranklist[i][0])
-        return resultlist
-
-    def TfIdfUpdate(self):
-        """
-        :return: this method updates the TfIdf values of all the stems for all the documents in the index.
-                  at the end it update the relevant flag.
-        """
-        for doc in self.DocIndex.values():
-            for stem in doc.Stems:
-                tf = doc.Tf_For_Stem(stem)
-                idf = self.Idf_For_Stem(stem)
-                doc.Tf_Idf_Ranks[stem] = tf*idf
-            doc.A_2norm = LA.norm(doc.Tf_Idf_Ranks.values()) #maybe unnecessary
-        self.Tf_Idf_Flag = 1
-        return
-
-
+            return resultlist
 
 Index = IndexEnvironment()
 Index.addIndex("C:/Users/Ziv/Desktop/test.xml")

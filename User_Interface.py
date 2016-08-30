@@ -1,7 +1,7 @@
 from Tkinter import *
 import pickle
-#import Ranker_Enviroment # need to see how to make it work
-#import Index_envierment # need to see how to make it work
+#import DS-Poject-S2016.Ranker_Enviroment # need to see how to make it work
+#from DS-Poject-S2016 import Index_envierment # need to see how to make it work
 
 
 class Application(Frame):
@@ -39,7 +39,7 @@ class Application(Frame):
         self.button2 = Button(self, text="Yes", command = self.create_second_action_witches)
         self.button2.grid(row=4, column=0, columnspan=120, sticky=W)
         # instruction for third option
-        self.instructionopt3 = Label(self,text="do you want to provide a path for a file that has an Index and a query file and get the documents ranking from the Index (for each query) in separate file?")
+        self.instructionopt3 = Label(self,text="do you want to provide a path for a file that has an Index (pickled file) and a query file and get the documents ranking from the Index (for each query) in separate file?")
         self.instructionopt3.grid(row=5, column=0, columnspan=120, sticky=W)
         # butten for third option
         self.button3 = Button(self, text="Yes", command=self.create_third_action_witches)
@@ -98,11 +98,45 @@ class Application(Frame):
         self.resultfile = Entry(self)
         self.resultfile.grid(row=3, column=5, columnspan=2, sticky=W)
         # subbmit button
-        self.subbmitbutton = Button(self, text = "Subbmit") # need command
+        self.subbmitbutton = Button(self, text = "Subbmit", command = self.first_action)
         self.subbmitbutton.grid(row=4, column=0, columnspan=2, sticky=W)
         # return button
         self.returnbutton = Button(self, text = "return to menu", command = self.return_to_menu)
         self.returnbutton.grid(row=4, column=1, columnspan=2, sticky=W)
+
+    def first_action(self):
+        """
+        :return: returns the documents rank from document file according to the queries in
+        queryfile and writes it to the resultflie in TREC 6 columns format
+        """
+        # text box
+        self.text = Text(self, width=35, height=20, wrap=WORD)
+        self.text.grid(row=4, column=0, columnspan=10, sticky=W)
+        self.text.delete(0.0, END)
+        message = 'wait for it...'
+        self.text.insert(0.0, message)
+        content1 = self.docfile.get()
+        content2 = self.queryfile.get()
+        try:
+            Index = IndexEnvironment()
+            Index.addIndex(content1)
+            Ranker = RankerEnvironment(Index)
+            Ranker.loadQueries(content2)
+        except Exception as e:
+            self.text.delete(0.0, END)
+            message = str(e).replace(",", "").replace("'", "").replace("(", "").replace(")", "")
+            self.text.insert(0.0, message)
+        else:
+            try:
+                Ranker.runQueries(self.resultfile.get())
+            except Exception as e:
+                self.text.delete(0.0, END)
+                message = str(e).replace(",", "").replace("'", "").replace("(", "").replace(")", "")
+                self.text.insert(0.0, message)
+            else:
+                self.text.delete(0.0, END)
+                message = 'successful result !!!!'
+                self.text.insert(0.0, message)
 
     def create_second_action_witches(self):
         """
@@ -178,11 +212,45 @@ class Application(Frame):
         self.resultfile = Entry(self)
         self.resultfile.grid(row=3, column=5, columnspan=2, sticky=W)
         # subbmit button
-        self.subbmitbutton = Button(self, text="Subbmit")  # need command
+        self.subbmitbutton = Button(self, text="Subbmit", command = self.third_action)
         self.subbmitbutton.grid(row=4, column=0, columnspan=2, sticky=W)
         # return button
         self.returnbutton = Button(self, text="return to menu", command=self.return_to_menu)
         self.returnbutton.grid(row=4, column=1, columnspan=2, sticky=W)
+
+    def third_action(self):
+        """
+        :return: returns the documents rank from document file (in this case pickled file) according to the queries in
+        queryfile and writes it to the resultflie in TREC 6 columns format
+        """
+        # text box
+        self.text = Text(self, width=35, height=20, wrap=WORD)
+        self.text.grid(row=4, column=0, columnspan=10, sticky=W)
+        self.text.delete(0.0, END)
+        message = 'wait for it...'
+        self.text.insert(0.0, message)
+        content1 = self.docfile.get()
+        content2 = self.queryfile.get()
+        try:
+            with open(content1 +'.pickle', 'rb') as handle:
+                Index = pickle.load(handle)
+            Ranker = RankerEnvironment(Index)
+            Ranker.loadQueries(content2)
+        except Exception as e:
+            self.text.delete(0.0, END)
+            message = str(e).replace(",", "").replace("'", "").replace("(", "").replace(")", "")
+            self.text.insert(0.0, message)
+        else:
+            try:
+                Ranker.runQueries(self.resultfile.get())
+            except Exception as e:
+                self.text.delete(0.0, END)
+                message = str(e).replace(",", "").replace("'", "").replace("(", "").replace(")", "")
+                self.text.insert(0.0, message)
+            else:
+                self.text.delete(0.0, END)
+                message = 'successful result !!!!'
+                self.text.insert(0.0, message)
 
     def create_forth_action_witches(self):
         """
