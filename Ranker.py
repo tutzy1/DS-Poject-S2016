@@ -82,7 +82,7 @@ class RankerEnvironment:
         q_stems = query.Stems.keys()
         query_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
         for stem in q_stems:
-            query_tfidf = np.append(query_tfidf, (query.Stems[stem].size)*(self.Index.Idf_For_Stem(stem)))
+            query_tfidf = np.append(query_tfidf, query.Stems[stem].size)
         for doc in self.Index.DocIndex:
             doc_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
             for stem in q_stems:
