@@ -262,7 +262,7 @@ class Application(Frame):
         content1 = self.docfile.get()
         content2 = self.queryfile.get()
         try:
-            with open(content1 +'.pickle', 'rb') as handle:
+            with open(content1, 'rb') as handle:
                 Index = pickle.load(handle)
             Ranker = RankerEnvironment(Index)
             Ranker.loadQueries(content2)

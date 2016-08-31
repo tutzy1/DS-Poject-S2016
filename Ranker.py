@@ -91,7 +91,7 @@ class RankerEnvironment:
                 else:
                     doc_tfidf = np.append(doc_tfidf, 0)
             if np.count_nonzero(doc_tfidf) == 0 or np.count_nonzero(query_tfidf) == 0:  # checks there's no division by 0 in cosine calculation
-                CosinSimilarity = 0  # need to find out if exception is needed
+                CosinSimilarity = 0
             else:
                 CosinSimilarity = 1.0 - spatial.distance.cosine(doc_tfidf, query_tfidf)
             if isnan(CosinSimilarity):
