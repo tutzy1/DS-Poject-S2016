@@ -69,7 +69,7 @@ class Application(Frame):
         """
         :return: deletes the current withchs and creates the main menu's witches
         """
-        option_list = ['results','button3','howmanyuniqestems','button2','howmanyuniqeterms','button1','howmanydoc','whattoknow','instructiondocfile','docfile','instructionqueryfile','queryfile','instructionresultfile','resultfile','subbmitbutton','returnbutton','instructionquery','query','text','subbmitbutton1','instructionlength','length','results']
+        option_list = ['button3','howmanyuniqestems','button2','howmanyuniqeterms','button1','howmanydoc','whattoknow','instructiondocfile','docfile','instructionqueryfile','queryfile','instructionresultfile','resultfile','subbmitbutton','returnbutton','instructionquery','query','text','subbmitbutton1','instructionlength','length','results']
         for i in range (len(option_list)):
             if hasattr(self, option_list[i]):
                 getattr(self,option_list[i]).destroy()
