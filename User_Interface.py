@@ -1,8 +1,9 @@
 from Tkinter import *
 import pickle
-#import DS-Poject-S2016.Ranker_Enviroment # need to see how to make it work
-#from DS-Poject-S2016 import Index_envierment # need to see how to make it work
-
+from Ranker import *
+from Index_envierment import *
+from Document import *
+from Query import *
 
 class Application(Frame):
     def __init__(self, master):
@@ -33,7 +34,7 @@ class Application(Frame):
         self.button1 = Button(self, text = "Yes", command = self.create_first_action_witches)
         self.button1.grid(row = 2, column = 0 , columnspan = 120, sticky = W)
         # instruction for second option
-        self.instructionopt2 = Label(self,text="do you want to provide a douments and path for a file and to get the document file indexed and save at the proveded file?")
+        self.instructionopt2 = Label(self,text="do you want to provide a douments and path for a file and to get the document file indexed and save at the proveded file and find out details about the Index?")
         self.instructionopt2.grid(row=3, column=0, columnspan=120, sticky=W)
         # butten for second option
         self.button2 = Button(self, text="Yes", command = self.create_second_action_witches)
@@ -68,7 +69,7 @@ class Application(Frame):
         """
         :return: deletes the current withchs and creates the main menu's witches
         """
-        option_list = ['instructiondocfile','docfile','instructionqueryfile','queryfile','instructionresultfile','resultfile','subbmitbutton','returnbutton','instructionquery','query','text','subbmitbutton1','instructionlength','length','results']
+        option_list = ['results','button3','howmanyuniqestems','button2','howmanyuniqeterms','button1','howmanydoc','whattoknow','instructiondocfile','docfile','instructionqueryfile','queryfile','instructionresultfile','resultfile','subbmitbutton','returnbutton','instructionquery','query','text','subbmitbutton1','instructionlength','length','results']
         for i in range (len(option_list)):
             if hasattr(self, option_list[i]):
                 getattr(self,option_list[i]).destroy()
@@ -111,7 +112,7 @@ class Application(Frame):
         """
         # text box
         self.text = Text(self, width=35, height=20, wrap=WORD)
-        self.text.grid(row=4, column=0, columnspan=10, sticky=W)
+        self.text.grid(row=5, column=0, columnspan=10, sticky=W)
         self.text.delete(0.0, END)
         message = 'wait for it...'
         self.text.insert(0.0, message)
@@ -168,25 +169,54 @@ class Application(Frame):
         """
         # text box
         self.text = Text(self, width=35, height=20, wrap=WORD)
-        self.text.grid(row=4, column=0, columnspan=10, sticky=W)
+        self.text.grid(row=8, column=0, columnspan=10, sticky=W)
         self.text.delete(0.0, END)
         message = 'wait for it...'
         self.text.insert(0.0, message)
         content = self.docfile.get()
         try:
-            Index = IndexEnvironment()
-            Index.addIndex(content)
+            self.Index = IndexEnvironment()
+            self.Index.addIndex(content)
         except Exception as e:
             self.text.delete(0.0, END)
             message = str(e).replace(",", "").replace("'", "").replace("(", "").replace(")", "")
             self.text.insert(0.0, message)
         else:
             f = open(self.resultfile.get(), 'wb')
-            pickle.dump(Index, f)
+            pickle.dump(self.Index, f)
             f.close()
             self.text.delete(0.0, END)
             message = 'successful result !!!!'
             self.text.insert(0.0, message)
+            self.whattoknow = Label(self, text = "what do you wanna know about your Index?", fg = "blue")
+            self.whattoknow.grid(row=4, column=0, columnspan=10, sticky=W)
+            self.howmanydoc = Label(self, text="how many documents are in the Index?")
+            self.howmanydoc.grid(row=5, column=0, columnspan=8, sticky=W)
+            self.button1 = Button(self, text="Yes", command=self.how_many_docs)
+            self.button1.grid(row=5, column=9, columnspan=2, sticky=W)
+            self.howmanyuniqeterms = Label(self, text="how many uniqe terms are in the Index?")
+            self.howmanyuniqeterms.grid(row=6, column=0, columnspan=8, sticky=W)
+            self.button2 = Button(self, text="Yes", command=self.how_many_unique_terms)
+            self.button2.grid(row=6, column=9, columnspan=2, sticky=W)
+            self.howmanyuniqestems = Label(self, text="how many uniqe terms are in the Index?")
+            self.howmanyuniqestems.grid(row=7, column=0, columnspan=8, sticky=W)
+            self.button3 = Button(self, text="Yes", command=self.how_many_unique_stems)
+            self.button3.grid(row=7, column=9, columnspan=2, sticky=W)
+
+    def how_many_docs(self):
+        self.text.delete(0.0, END)
+        message = 'the number of docs is - ' + str(self.Index.documentCount())
+        self.text.insert(0.0, message)
+
+    def how_many_unique_terms(self):
+        self.text.delete(0.0, END)
+        message = 'the number of unique terms is - ' + str(self.Index.UniqueTermsInIndex())
+        self.text.insert(0.0, message)
+
+    def how_many_unique_stems(self):
+        self.text.delete(0.0, END)
+        message = 'the number of unique stems is - ' + str(self.Index.UniqueStemsInIndex())
+        self.text.insert(0.0, message)
 
     def create_third_action_witches(self):
         """
@@ -225,7 +255,7 @@ class Application(Frame):
         """
         # text box
         self.text = Text(self, width=35, height=20, wrap=WORD)
-        self.text.grid(row=4, column=0, columnspan=10, sticky=W)
+        self.text.grid(row=5, column=0, columnspan=10, sticky=W)
         self.text.delete(0.0, END)
         message = 'wait for it...'
         self.text.insert(0.0, message)
@@ -322,11 +352,11 @@ class Application(Frame):
             self.text.insert(0.0, message)
         else:
             # result sign
-            self.results = Label(self, text="the Doc ID's of the result:", fg='blue')
+            self.results = Label(self, text="the Docs of the result:", fg='blue')
             self.results.grid(row=5, column=1, columnspan=5, sticky=W)
             self.text.delete(0.0, END)
             for i in range(len(answer)):
-                message = "num - " + "'" + str(i+1) + "'" + " is - " + str(answer[i].Doc_ID) +" |"
+                message = "num - " + "'" + str(i+1) + "'" + " is - " + str(answer[i]) +"\n"
                 self.text.insert(0.0, message)
 
 root = Tk()

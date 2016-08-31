@@ -1,66 +1,14 @@
 import xml.etree.ElementTree as ET
-import Index_envierment
+from Index_envierment import *
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 from math import pow
 from math import sqrt
 from numpy import linalg as LA
 from scipy import spatial
+from Query import *
+import re
 
-
-
-class Query:
-    def __init__(self, Query_ID, Text):
-        self.Query_ID = Query_ID # unique Query_id
-        self.Terms = {} # dictionery - keys: terms (strings) , values - arreys of positions(int)
-        self.Stems = {} # dictionery - keys: stems (strings) , values - arreys of positions(int)
-        self.Text = Text # original query's text
-        self.Break_Text_Into_Query()
-
-    def addTerm(self, Term, position):
-        """
-        :param Term: type - string - a word from text
-        :param position: type - int
-        :return: the function adds the Term and position to the correct place inside query
-        """
-        if Term in self.Terms:
-            self.Terms[Term] = np.append(self.Terms[Term],(position))
-        else :
-            self.Terms[Term] = np.array(position)
-        return
-
-    def addStem(self, Stem, position):
-        """
-        :param Stem: type - string - a word from text in stem form
-        :param position: type - int
-        :return: the function adds the Stem and position to the correct place inside Query
-        """
-        if Stem in self.Stems:
-            self.Stems[Stem] = np.append(self.Stems[Stem],(position))
-        else:
-            self.Stems[Stem] = np.array(position)
-        return
-
-    def RestoreText(self):
-        """
-        :return: returns the original Text that was on the input of the query
-        """
-        return self.Text
-
-    def Break_Text_Into_Query(self):
-        """
-        :return: the function breaks the words in the text and adds it to the Query
-        """
-        Text = str(self.Text)
-        TextVec = re.split("\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]|(?='s)|[']", Text)
-        TextVec = filter(None, TextVec)
-        st = PorterStemmer()
-        for i in range(len(TextVec)) :
-            term = TextVec[i]
-            stem = st.stem(term)
-            self.addTerm(term, i)
-            self.addStem(stem, i)
-        return
 
 
 class RankerEnvironment:
@@ -68,7 +16,7 @@ class RankerEnvironment:
         self.QueriesDict = {} # dictionary - keys: queryID (strings) , values - Query
         self.Index = Index # the index for this ranker environment
 
-    def query_Exists_In_Dictionary(self, Query_ID):
+    def Query_Exists_In_Dictionary(self, Query_ID):
         """
         :param Query_ID: type - string/int - a Query's Query_ID
         :return: True if the query already exists in the dictionary and False if not
@@ -83,7 +31,7 @@ class RankerEnvironment:
         :param pathname: a path to a queries XML file
         :return: the function opens the file and saves the queries to the in the dictionary QueriesDict
         :exceptions: throws exceptions if one of the Queries in the file from pathname already exists in the dictionary
-        or if the file can't be opened
+        or if the file can't be opened, or if one of the queries is empty
         """
         try:
             f = open(pathname, 'r')
@@ -94,7 +42,9 @@ class RankerEnvironment:
         for Quer in root.findall('query'):
             Query_ID = (Quer.find('number').text).strip()
             text = Quer.find('text').text
-            if self.Query_Exists_In_Dictionary(Query_ID):
+            if not text.strip():
+                raise Exception('the query is empty')
+            elif self.Query_Exists_In_Dictionary(Query_ID):
                 raise Exception("the query titeled -'", Query_ID, "' is already inside the dictionary")
             temp = Query(Query_ID, text)
             self.QueriesDict[Query_ID] = temp
@@ -132,12 +82,12 @@ class RankerEnvironment:
         q_stems = query.Stems.keys()
         query_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
         for stem in q_stems:
-            query_tfidf = np.append(query_tfidf, query.Stems[stem].size())
+            query_tfidf = np.append(query_tfidf, (query.Stems[stem].size)*(self.Index.Idf_For_Stem(stem)))
         for doc in self.Index.DocIndex:
             doc_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
             for stem in q_stems:
-                if stem in doc.Stems:
-                    doc_tfidf = np.append(doc_tfidf, doc.Tf_Idf_Ranks[stem])
+                if stem in self.Index.DocIndex[doc].Stems:
+                    doc_tfidf = np.append(doc_tfidf, self.Index.DocIndex[doc].Tf_Idf_Ranks[stem])
                 else:
                     doc_tfidf = np.append(doc_tfidf, 0)
             if np.count_nonzero(doc_tfidf) == 0 or np.count_nonzero(query_tfidf) == 0:  # checks there's no division by 0 in cosine calculation
@@ -146,7 +96,7 @@ class RankerEnvironment:
                 CosinSimilarity = 1.0 - spatial.distance.cosine(doc_tfidf, query_tfidf)
             if isnan(CosinSimilarity):
                 CosinSimilarity = 0
-            ranklist.append((doc.Doc_ID, CosinSimilarity))
+            ranklist.append((self.Index.DocIndex[doc].Doc_ID, CosinSimilarity))
         ranklist.sort(key=lambda tup: tup[1], reverse=True)  # sorts in reverse order according to CosinSimilarity
         if limit == 0:
             return ranklist
@@ -179,17 +129,16 @@ class RankerEnvironment:
         output = self.get_Result_In_TREC6Columns(result, temp_query.Query_ID)
         if pathnameToSave == None:
             with open(pathnameToSave, 'w') as f:
-                f.write(result)
+                f.write(output)
             return
         else:
-            print result + "\n"
+            print output + "\n"
         return
 
     def get_Result_In_TREC6Columns(self, documents, queryID):
         """
         :param queryID: type - int
-        :param query: type - string - the query's text
-        :param limit: type - int - maximum amount of documents in the result
+        :param documents: type - list of Document - each represented by a tuple (doc_ID,rank)
         :return: convert the given list of documents (represented by tuples of (docID, rank))
          to a "TREC 6 columns" formatted string
         """
