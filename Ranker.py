@@ -121,13 +121,13 @@ class RankerEnvironment:
                 raise  Exception("the query wasn't provided")
             else:
                 temp_query = Query('999999',query) # creates a temp Query without updating Ranker
-        elif self.query_Exists_In_Dictionary(queryID):
+        elif self.Query_Exists_In_Dictionary(queryID):
             temp_query = self.QueriesDict[queryID]
         else:
             raise Exception("the query titeled -'", queryID, "' does not exist in dictionary")
         result = self.Rank(temp_query, limit)
         output = self.get_Result_In_TREC6Columns(result, temp_query.Query_ID)
-        if pathnameToSave == None:
+        if pathnameToSave != None:
             with open(pathnameToSave, 'w') as f:
                 f.write(output)
             return

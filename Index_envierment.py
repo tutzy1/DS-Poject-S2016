@@ -12,8 +12,6 @@ from Query import *
 from Document import *
 from Ranker import *
 
-
-
 class IndexEnvironment:
 
     def __init__(self):
@@ -389,4 +387,6 @@ Index.addIndex("C:/Users/Ziv/Desktop/test.xml")
 #list = Index.runQuery('hello in haifa i walk" very am')
 #for i in range(len(list)):
 #    print list[i]
-
+#ranker = RankerEnvironment(Index)
+#ranker.loadQueries("C:/Users/Ziv/Desktop/q.xml")
+#ranker.runQuery('1',None,'C:/Users/Ziv/Desktop/jg')
