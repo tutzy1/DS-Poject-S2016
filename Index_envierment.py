@@ -4,7 +4,10 @@ from nltk.stem.porter import PorterStemmer
 import re
 from math import log10
 from math import isnan
+from math import pow
+from math import sqrt
 from scipy import spatial
+from numpy import linalg as LA
 import Ranker_Enviroment # need to see how to make it work
 
 class Document:
@@ -13,6 +16,7 @@ class Document:
         self.Terms = {} # dictionery - keys: terms (strings) , values - arreys of positions(int)
         self.Stems = {} # dictionery - keys: stems (strings) , values - arreys of positions(int)
         self.Text = Text # original doc's text
+        self.Tf_Idf_Ranks = {} # dictionary - keys: stems (strings) , values - Tf_Idf rank for the stem in the document
 
     def addTerm(self, Term, position):
         """
@@ -51,12 +55,14 @@ class Document:
         """
         return self.Stems[stem].size
 
+
 class IndexEnvironment:
 
     def __init__(self):
         self.ITerms = {} # dictionery - keys: terms (strings) , values - arreys of Doc_IDs
         self.IStems = {} # dictionery - keys: terms (strings) , values - arreys of Doc_IDs
         self.DocIndex = {} # dictionery - keys: Doc_IDs , values - Documents
+        self.Tf_Idf_Flag = 0 # flag that indicates whether the TfIdf values in this index is up to date
 
     def Doc_Exists_In_Index(self, Doc_ID):
         """
@@ -88,6 +94,7 @@ class IndexEnvironment:
                 raise Exception("the doc titeled -'", Doc_ID, "' is already inside the index")
             temp = Document(Doc_ID, Text)
             self.Break_Text_Into_Doc(temp, Text)
+        self.Tf_Idf_Flag = 0
         f.close()
         return
 
@@ -309,7 +316,7 @@ class IndexEnvironment:
         elif limit > self.documentCount():
             raise Exception('limit is bigger then amount of documents inside the Index')
         InputQuery = Query('999999',query) # creates a temp Query without updating Ranker
-        InputQuery.Break_Text_Into_Query(query)
+        """
         ranklist = []
         for key in self.DocIndex:
             query_tfidf = np.array(0) # the zero just for initialize, doesn't have effect on result
@@ -328,6 +335,10 @@ class IndexEnvironment:
             ranklist.append((self.DocIndex[key], CosinSimilarity))
         ranklist.sort(key=lambda tup: tup[1], reverse=True) # sorts in reverse order according to CosinSimilarity
         resultlist = []
+        """
+        ranker = RankerEnvironment(self)
+        ranklist = ranker.Rank(InputQuery, limit)
+        resultlist = []
         if limit == 0 :
             for i in range(len(ranklist)):
                 resultlist.append(ranklist[i][0])
@@ -335,7 +346,22 @@ class IndexEnvironment:
         else:
             for i in range(limit):
                 resultlist.append(ranklist[i][0])
-            return resultlist
+        return resultlist
+
+    def TfIdfUpdate(self):
+        """
+        :return: this method updates the TfIdf values of all the stems for all the documents in the index.
+                  at the end it update the relevant flag.
+        """
+        for doc in self.DocIndex.values():
+            for stem in doc.Stems:
+                tf = doc.Tf_For_Stem(stem)
+                idf = self.Idf_For_Stem(stem)
+                doc.Tf_Idf_Ranks[stem] = tf*idf
+        self.Tf_Idf_Flag = 1
+        return
+
+
 
 Index = IndexEnvironment()
 Index.addIndex("C:/Users/Ziv/Desktop/test.xml")

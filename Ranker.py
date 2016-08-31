@@ -5,6 +5,7 @@ from nltk.stem.porter import PorterStemmer
 from math import pow
 from math import sqrt
 from numpy import linalg as LA
+from scipy import spatial
 
 
 
@@ -14,6 +15,7 @@ class Query:
         self.Terms = {} # dictionery - keys: terms (strings) , values - arreys of positions(int)
         self.Stems = {} # dictionery - keys: stems (strings) , values - arreys of positions(int)
         self.Text = Text # original query's text
+        self.Break_Text_Into_Query()
 
     def addTerm(self, Term, position):
         """
@@ -45,6 +47,20 @@ class Query:
         """
         return self.Text
 
+    def Break_Text_Into_Query(self):
+        """
+        :return: the function breaks the words in the text and adds it to the Query
+        """
+        Text = str(self.Text)
+        TextVec = re.split("\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]|(?='s)|[']", Text)
+        TextVec = filter(None, TextVec)
+        st = PorterStemmer()
+        for i in range(len(TextVec)) :
+            term = TextVec[i]
+            stem = st.stem(term)
+            self.addTerm(term, i)
+            self.addStem(stem, i)
+        return
 
 
 class RankerEnvironment:
@@ -81,25 +97,8 @@ class RankerEnvironment:
             if self.Query_Exists_In_Dictionary(Query_ID):
                 raise Exception("the query titeled -'", Query_ID, "' is already inside the dictionary")
             temp = Query(Query_ID, text)
-            self.Break_Text_Into_Query(temp, text)
+            self.QueriesDict[Query_ID] = temp
         f.close()
-        return
-
-    def Break_Text_Into_Query(self, Query, Text):
-        """
-        :param Query: type - Query
-        :param Text: type - string
-        :return: the function breaks the words in the text and adds it to the Query
-        """
-        Text = str(Text)
-        TextVec = re.split("\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]|(?='s)|[']", Text)
-        TextVec = filter(None, TextVec)
-        for i in range(len(TextVec)) :
-            term = TextVec[i]
-            st = PorterStemmer() # Is it necessary? Doesn't it create new object of the class in each iteration?
-            stem = st.stem(term)
-            Query.addTerm(term, i)
-            Query.addStem(stem, i)
         return
 
     def getQueriesMetadata(self, metaData):
@@ -120,27 +119,6 @@ class RankerEnvironment:
             return result
         else:
             raise Exception('metadata -', metaData, ' does not exists (from getQueriesMetadata)')
-
-    def Calc_Similarity(self, doc, query):
-        """
-        :param doc: type - Document - the document to calculate similarity with
-        :param query: type - Query - the query to calculate similarity with
-        :return: the method calculates and return the similarity value between the given Document
-                 and Query according to cosin similarity metric.
-                 for simplicity in the documentation - A represent the vector of the TfIdf values for the document stems,
-                 B for the qeury.
-        """
-        if self.Index.Tf_Idf_Flag == 0:
-            self.Index.TfIdfUpdate()
-        sum = 0 # sum A_i*B_i
-        B_2norm = 0 #the 2nd norm of the query TfIdf vector
-        for stem in query.Stems:
-            q_idf = query.Stems[stem].size()
-            B_2norm = B_2norm + pow(q_idf,2)
-            if stem in doc.Stems:
-                sum = sum + q_idf*doc.Tf_Idf_Ranks[stem]
-        sim = float(sum)/float(doc.A_2norm*sqrt(B_2norm))
-        return sim
 
     def Rank(self, query, limit = 0):
         """
@@ -197,9 +175,9 @@ class RankerEnvironment:
             temp_query = self.QueriesDict[queryID]
         else:
             raise Exception("the query titeled -'", queryID, "' does not exist in dictionary")
-        result = self.Rank(temp_query,limit)
+        result = self.Rank(temp_query, limit)
         output = self.get_Result_In_TREC6Columns(result, temp_query.Query_ID)
-        if pathnameToSave != None:
+        if pathnameToSave == None:
             with open(pathnameToSave, 'w') as f:
                 f.write(result)
             return
@@ -224,23 +202,21 @@ class RankerEnvironment:
 
     def runQueries(self, pathnameToSave = None, limit = 0):
         """
-        :param limit: type - int - maximum amount of documents in the result of a single query
+        :param limit: type - int - maximum amount of documents in the result of a single query (optional)
         :param pathnameToSave: type - string - the path to save the output at (optional)
         :return: for each query in the dictionary - rank all the documents in the Index accordingly
                  and print the result for each query (up to |limit| documents per query) to screen
-                 in
-                 "TREC 6 columns" format.
-        exceptions: throws an exception if one of the queries in the dictionary is empty.
+                 in "TREC 6 columns" format.
         """
         if pathnameToSave != None:
             with open(pathnameToSave, 'w') as f:
                 for queryID in self.QueriesDict:
-                    result = self.Rank(self.QueriesDict[queryID])
+                    result = self.Rank(self.QueriesDict[queryID], limit)
                     f.write(self.get_Result_In_TREC6Columns(result, queryID) + "\n")
         else:
             for queryID in self.QueriesDict:
-                result = self.Rank(self.QueriesDict[queryID])
-                print result + "\n"
+                result = self.Rank(self.QueriesDict[queryID], limit)
+                print self.get_Result_In_TREC6Columns(result, queryID) + "\n"
         self.QueriesDict = {} # check if need to be empty
         return
 
