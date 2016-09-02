@@ -2,7 +2,11 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
+<<<<<<< 2a9cb6897334a39a883a3f1e94c5e8910ccd1da8
     <orderEntry type="jdk" jdkName="Python 2.7.12 (C:\Users\omrip1\Anaconda2\python.exe)" jdkType="Python SDK" />
+=======
+    <orderEntry type="jdk" jdkName="Python 2.7.12 (C:\Users\tutzy\Anaconda2\python.exe)" jdkType="Python SDK" />
+>>>>>>> start of the GUI
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">

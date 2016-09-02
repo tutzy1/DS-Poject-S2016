@@ -322,8 +322,7 @@ class IndexEnvironment:
 
 
 
-Index = IndexEnvironment()
-Index.addIndex("C:/Users/Ziv/Desktop/test.xml")
+
 #**************----tests---******************
 #try:
  #   Index.getDocuments(['hey','123','zubi'])

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< 2a9cb6897334a39a883a3f1e94c5e8910ccd1da8
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 2.7.12 (C:\Users\omrip1\Anaconda2\python.exe)" project-jdk-type="Python SDK" />
+=======
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 2.7.12 (C:\Users\tutzy\Anaconda2\python.exe)" project-jdk-type="Python SDK" />
+>>>>>>> start of the GUI
 </project>
