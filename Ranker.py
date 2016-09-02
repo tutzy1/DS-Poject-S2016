@@ -161,6 +161,7 @@ class RankerEnvironment:
             with open(pathnameToSave, 'w') as f:
                 for queryID in self.QueriesDict:
                     result = self.Rank(self.QueriesDict[queryID], limit)
+                    f.write("QueryID: " + queryID + "\n")
                     f.write(self.get_Result_In_TREC6Columns(result, queryID) + "\n")
         else:
             for queryID in self.QueriesDict:
