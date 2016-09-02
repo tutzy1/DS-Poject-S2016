@@ -54,34 +54,36 @@ class IndexEnvironment:
         f.close()
         return
 
-    def Update_Index(self, Doc, Term, Stem):
+    def Update_Index(self, Doc):
         """
         :param Doc: type - Document
-        :param Term: type - string - a word from text
-        :param Stem: type - string - the same word from text in stem form
-        :return: fills the IndexEnvironment's arguments and updates them acoording to the Doc, Term and Stem
+        :return: fills the IndexEnvironment's arguments and updates them according to the Doc
         """
         if Doc.Doc_ID in self.DocIndex:
-            if Term in self.ITerms :
-                if Doc.Doc_ID not in self.ITerms[Term] :
-                    self.ITerms[Term] = np.append(self.ITerms[Term],(Doc.Doc_ID))
-            else :
-                self.ITerms[Term] = np.array(Doc.Doc_ID)
-            if Stem in self.IStems:
-                if Doc.Doc_ID not in self.IStems[Stem]:
-                    self.IStems[Stem] = np.append(self.IStems[Stem],(Doc.Doc_ID))
-            else:
-                self.IStems[Stem] = np.array(Doc.Doc_ID)
-        else :
+            for Term in Doc.Terms:
+                if Term in self.ITerms:
+                    if Doc.Doc_ID not in self.ITerms[Term]:
+                        self.ITerms[Term] = np.append(self.ITerms[Term], (Doc.Doc_ID))
+                else:
+                    self.ITerms[Term] = np.array(Doc.Doc_ID)
+            for Stem in Doc.Stems:
+                if Stem in self.IStems:
+                    if Doc.Doc_ID not in self.IStems[Stem]:
+                        self.IStems[Stem] = np.append(self.IStems[Stem], (Doc.Doc_ID))
+                else:
+                    self.IStems[Stem] = np.array(Doc.Doc_ID)
+        else:
             self.DocIndex[Doc.Doc_ID] = Doc
-            if Term in self.ITerms:
-                self.ITerms[Term] = np.append(self.ITerms[Term],(Doc.Doc_ID))
-            else:
-                self.ITerms[Term] = np.array(Doc.Doc_ID)
-            if Stem in self.IStems:
-                self.IStems[Stem] = np.append(self.IStems[Stem],(Doc.Doc_ID))
-            else:
-                self.IStems[Stem] = np.array(Doc.Doc_ID)
+            for Term in Doc.Terms:
+                if Term in self.ITerms:
+                    self.ITerms[Term] = np.append(self.ITerms[Term],(Doc.Doc_ID))
+                else:
+                    self.ITerms[Term] = np.array(Doc.Doc_ID)
+            for Stem in Doc.Stems:
+                if Stem in self.IStems:
+                    self.IStems[Stem] = np.append(self.IStems[Stem],(Doc.Doc_ID))
+                else:
+                    self.IStems[Stem] = np.array(Doc.Doc_ID)
         return
 
     def Break_Text_Into_Doc(self, Doc, Text):
@@ -99,7 +101,7 @@ class IndexEnvironment:
             stem = st.stem(term)
             Doc.addTerm(term, i)
             Doc.addStem(stem, i)
-            self.Update_Index(Doc, term, stem)
+        self.Update_Index(Doc)
         return
 
     def getDocuments(self, documentIDs):
@@ -109,13 +111,13 @@ class IndexEnvironment:
         :exceptions: if one of the IDs does'nt exists in the Index throws an Exception
         """
         resultlist = []
-        for i in range(len(documentIDs)):
-            if self.Doc_Exists_In_Index(documentIDs[i]):
-                tempdoc = self.DocIndex[documentIDs[i]]
-                temp = {'terms': tempdoc.Terms.keys(),'stems': tempdoc.Stems.keys(),'termsPositions': tempdoc.Terms.values(),'stemsPositions': tempdoc.Stems.values()}
+        for docID in documentIDs:
+            if self.Doc_Exists_In_Index(docID):
+                tempdoc = self.DocIndex[docID]
+                temp = {'terms': tempdoc.Terms.keys(), 'stems': tempdoc.Stems.keys(), 'termsPositions': tempdoc.Terms.values(), 'stemsPositions': tempdoc.Stems.values()}
                 resultlist.append(temp)
             else:
-                raise Exception('the requested Doc with doc id -',documentIDs[i],' does not exists in the index')
+                raise Exception('the requested Doc with doc id -', docID, ' does not exists in the index')
         return resultlist
 
     def getDocumentsMetadata(self, metaData):
