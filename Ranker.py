@@ -120,7 +120,7 @@ class RankerEnvironment:
             if query == None:
                 raise  Exception("the query wasn't provided")
             else:
-                temp_query = Query('999999',query) # creates a temp Query without updating Ranker
+                temp_query = Query('TempQuery',query) # creates a temp Query without updating Ranker
         elif self.Query_Exists_In_Dictionary(queryID):
             temp_query = self.QueriesDict[queryID]
         else:
@@ -133,7 +133,7 @@ class RankerEnvironment:
             return
         else:
             print output + "\n"
-        return
+        return output + "\n"
 
     def get_Result_In_TREC6Columns(self, documents, queryID):
         """
@@ -157,6 +157,7 @@ class RankerEnvironment:
                  and print the result for each query (up to |limit| documents per query) to screen
                  in "TREC 6 columns" format.
         """
+        result = ""
         if pathnameToSave != None:
             with open(pathnameToSave, 'w') as f:
                 for queryID in self.QueriesDict:
@@ -165,9 +166,11 @@ class RankerEnvironment:
                     f.write(self.get_Result_In_TREC6Columns(result, queryID) + "\n")
         else:
             for queryID in self.QueriesDict:
-                result = self.Rank(self.QueriesDict[queryID], limit)
-                print self.get_Result_In_TREC6Columns(result, queryID) + "\n"
+                print "QueryID: " + queryID + "\n"
+                result = result + "QueryID: " + queryID + "\n"
+                result = result + self.runQuery(queryID=queryID, limit=limit)
+                #print self.get_Result_In_TREC6Columns(result, queryID) + "\n"
         self.QueriesDict = {} # check if need to be empty
-        return
+        return result
 
 

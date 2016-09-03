@@ -1,7 +1,10 @@
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.scrollview import ScrollView
+from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -10,6 +13,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.textinput import TextInput
 from kivy.properties import ListProperty
 from kivy.base import runTouchApp
+from kivy.garden.scrolllabel import ScrollLabel
 from Ranker import *
 from Index_envierment import *
 from Document import *
@@ -78,6 +82,11 @@ class Menu(FloatLayout):
 
     def Run_Queries_File(self, path, name, limit):
         self.Ranker_Environment.runQueries(pathnameToSave= path + "\\" + name + ".txt", limit=int(limit))
+        self.popup_msg("The results have \nbeen saved \nsuccessfully!")
+        return
+
+    def Run_Query_File(self, query, path, name, limit):
+        self.Ranker_Environment.runQuery(query=str(query), pathnameToSave=path + "\\" + name + ".txt", limit=int(limit))
         self.popup_msg("The results have \nbeen saved \nsuccessfully!")
         return
 

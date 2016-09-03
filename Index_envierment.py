@@ -274,7 +274,7 @@ class IndexEnvironment:
             raise Exception('the query is empty')
         elif limit > self.documentCount():
             raise Exception('limit is bigger then amount of documents inside the Index')
-        InputQuery = Query('999999',query) # creates a temp Query without updating Ranker
+        InputQuery = Query('TempQuery',query) # creates a temp Query without updating Ranker
         """
         ranklist = []
         for key in self.DocIndex:
