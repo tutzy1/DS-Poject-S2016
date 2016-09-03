@@ -145,7 +145,7 @@ class RankerEnvironment:
         i = 1
         result = ""
         for tup in documents:
-            result = result + "{0} {1} {2} {3} {4} {5}\n".format(queryID, "Q0", tup[0], i, tup[1], "col6")
+            result = result + "{}    {}    {:^6}    {:^6d}    {:06.5f}    {}\n".format(queryID, "Q0", int(tup[0]), i, tup[1], "col6")
             i = i + 1
         return result
 

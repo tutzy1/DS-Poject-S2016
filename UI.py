@@ -11,7 +11,7 @@ from kivy.uix.label import Label
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.textinput import TextInput
-from kivy.properties import ListProperty
+from kivy.properties import ListProperty, NumericProperty, ObjectProperty, StringProperty
 from kivy.base import runTouchApp
 from kivy.garden.scrolllabel import ScrollLabel
 from Ranker import *
@@ -27,6 +27,9 @@ from os.path import join, isdir
 class Menu(FloatLayout):
     Index = IndexEnvironment()
     Ranker_Environment = RankerEnvironment(Index)
+    Doc_Count = StringProperty()
+    Queries_Count = StringProperty()
+    #history = ['MainScreen']
     #IndexDict = {} #Dictionary of the indexes
     #cur_index_selection = ''
     """
@@ -90,13 +93,38 @@ class Menu(FloatLayout):
         self.popup_msg("The results have \nbeen saved \nsuccessfully!")
         return
 
+    def PrintDocsIDs(self):
+        ids = self.Index.getDocumentsMetadata(metaData='DOCNO')
+        result = ""
+        for id in ids:
+            result = result + id + "\n"
+        return result
+
+    def PrintDocs(self):
+        docs = self.Index.getDocumentsMetadata(metaData='TEXT')
+        result = ""
+        for doc in docs:
+            result = result + doc + "\n\n"
+        return result
+
+    def PrintQueriesIDs(self):
+        ids = self.Ranker_Environment.getQueriesMetadata('number')
+        result = ""
+        for id in ids:
+            result = result + id + "\n"
+        return result
+
+    def PrintQueries(self):
+        queries = self.Ranker_Environment.getQueriesMetadata('text')
+        result = ""
+        for query in queries:
+            result = result + query + "\n\n"
+        return result
+
+
     def is_dir(self, directory, filename):
         return isdir(join(directory, filename))
 
-    def p(self,text):
-        print text
-        return
-    pass
 
 
 class MenuApp(App):
