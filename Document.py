@@ -45,4 +45,7 @@ class Document:
         :param stem: type - string - a stem
         :return: the Tf value of the stem in the Doc (int)
         """
-        return float(self.Stems[stem].size)/float(len(self.Stems))
+        doc_Text = str(self.Text)
+        doc_Text_Vec = re.split("\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]|(?='s)|[']", doc_Text)
+        doc_Text_Vec = filter(None, doc_Text_Vec)
+        return float(self.Stems[stem].size)/float(len(doc_Text_Vec))
