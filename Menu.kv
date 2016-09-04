@@ -125,7 +125,8 @@
                             text: "Run Query"
                             font_size: 25
                             size_hint: .8, .65
-                            on_press: _screen_manager.current = 'QueryInput'
+                            on_press:
+                                _screen_manager.current = 'QueryInput'
 
             Screen:
                 name: 'LoadQueries'
@@ -269,7 +270,7 @@
                             text: "Show results on the screen"
                             font_size: 35
                             on_press:
-                                sl.text = root.Ranker_Environment.runQuery(query=InputQuery.text, limit=int(Limit2.text))
+                                sl.text = root.Ranker_Environment.runQuery(query=InputQuery.text, limit=root.limit)
                                 _screen_manager.current = 'OutputScreen'
                     BoxLayout:
                         orientation: 'horizontal'
@@ -277,7 +278,7 @@
                             text: "Save results to file"
                             font_size: 30
                             on_press:
-                                root.Run_Query_File(InputQuery.text, limit=int(Limit2.text))
+                                root.Run_Query_File(InputQuery.text, limit=root.limit)
                                 _screen_manager.current = 'MainScreen'
             Screen:
                 name: 'RunQueryFile'
@@ -354,19 +355,6 @@
                                 hint_text: "Query..."
                                 font_size: 20
                                 multiline: True
-                        BoxLayout:
-                            orientation: 'horizontal'
-                            size_hint: 1, .1
-                            Label:
-                                text: "How many documents would you like \nto appear in the result list? \n(insert 0 to unlimit)"
-                                font_size: 20
-                            TextInput:
-                                id: Limit2
-                                hint_text: "Insert limit...(insert 0 to unlimit)"
-                                text: '0'
-                                font_size: 20
-                                input_filter: 'int'
-                                multiline: False
                         AnchorLayout:
                             size_hint: 1, .4
                             anchor_x: 'center'
@@ -375,6 +363,7 @@
                                 font_size: 35
                                 size_hint: .3, .3
                                 on_press:
+                                    root.Get_Limit()
                                     _screen_manager.current = 'RunQueryMenu'
             Screen:
                 name: 'OutputScreen'
