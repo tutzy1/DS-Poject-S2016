@@ -7,10 +7,9 @@ from kivy.garden.xpopup.form import XTextInput
 from kivy.garden.xpopup.notification import XMessage
 from os.path import expanduser
 from Ranker import *
-from Index_envierment import *
+from Index import *
 from Document import *
 from Query import *
-
 from os.path import join, isdir
 
 

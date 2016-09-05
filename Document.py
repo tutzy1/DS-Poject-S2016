@@ -1,6 +1,5 @@
 import numpy as np
 from nltk.stem.porter import PorterStemmer
-import re
 
 class Document:
     def __init__(self, Doc_ID, Text):

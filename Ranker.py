@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from Index_envierment import *
+from Index import *
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 from math import pow
@@ -7,9 +7,6 @@ from math import sqrt
 from numpy import linalg as LA
 from scipy import spatial
 from Query import *
-import re
-
-
 
 class RankerEnvironment:
     def __init__(self, Index):
