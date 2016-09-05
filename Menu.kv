@@ -5,16 +5,37 @@
     index_select: ''
     query: ''
     AnchorLayout:
-        anchor_x: 'center'
+        anchor_x: 'right'
         anchor_y: 'top'
+        ActionButton:
+            text: 'Go to the main menu'
+            font_size: 25
+            size_hint: .10, .12
+            icon: 'icons/home_icon&48.png'
+            on_press:
+                root.history.append(str(_screen_manager.current))
+                _screen_manager.current = 'MainScreen'
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'top'
+        ActionButton:
+            text: '     Back to \n  Last Screen'
+            font_size: 15
+            size_hint: .10, .12
+            icon: 'icons/sq_br_prev_icon&48.png'
+            on_press:
+                _screen_manager.current = root.GetLastScreen()
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
         ScreenManager:
-            size_hint: 1, .9
+            size_hint: .8, .80
             id: _screen_manager
             Screen:
                 name: 'MainScreen'
                 BoxLayout:
                     orientation: 'vertical'
-                    padding: 150, 50
+                    padding: 100, 50
                     spacing: 5
                     BoxLayout:
                         orientation: 'horizontal'
@@ -30,13 +51,16 @@
                             font_size: 25
                             on_press:
                                 root.Doc_Count = str(root.Index.documentCount())
+                                root.history.append('MainScreen')
                                 _screen_manager.current = 'IndexDetails'
                     BoxLayout:
                         orientation: 'horizontal'
                         Button:
                             text: "Go to the Ranker Environment"
                             font_size: 25
-                            on_press: _screen_manager.current = 'Ranker'
+                            on_press:
+                                root.history.append('MainScreen')
+                                _screen_manager.current = 'Ranker'
                     BoxLayout:
                         orientation: 'horizontal'
                         Button:
@@ -44,54 +68,14 @@
                             font_size: 25
                             on_press:
                                 root.Queries_Count = str(len(root.Ranker_Environment.getQueriesMetadata('number')))
+                                root.history.append('MainScreen')
                                 _screen_manager.current = 'QueriesDetails'
-
-            Screen:
-                name: 'LoadDocuments'
-                FloatLayout:
-                    orientation: 'vertical'
-                    padding: 50
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint: .5, .3
-                        pos: 200,200
-                        spacing: 5
-                        Button:
-                            text: "Create new index"
-                            font_size: 30
-                            on_press: _screen_manager.current = 'CreateNewIndex'
-                        Button:
-                            text: "Load to an exist index"
-                            font_size: 30
-                            on_press:
-                                root.choose_index()
-                                _screen_manager.current = 'LoadExistIndex'
-            Screen:
-                name: 'LoadExistIndex'
-                FloatLayout:
-                    orientation: 'vertical'
-                    padding: 150, 50
-                    AnchorLayout:
-                        size_hint: .3, .15
-                        anchor_x: 'center'
-                        pos: 280,300
-                        Button:
-                            id: index_menu
-                            text: 'Choose index'
-                    AnchorLayout:
-                        size_hint: .3, .15
-                        anchor_x: 'center'
-                        pos: 280,30
-                        Button:
-                            text: 'Submit'
-                            on_press:
-                                root.save_index_selection(index_menu.text)
 
             Screen:
                 name: 'Ranker'
                 BoxLayout:
                     orientation: 'vertical'
-                    padding: 150, 50
+                    padding: 50, 50
                     spacing: 5
                     Label:
                         text: "[b]The Ranker Environment[/b]"
@@ -116,6 +100,7 @@
                             size_hint: .8, .65
                             on_press:
                                 root.Get_Limit()
+                                root.history.append('Ranker')
                                 _screen_manager.current = 'RunQueriesMenu'
                     AnchorLayout:
                         anchor_x: 'center'
@@ -126,245 +111,113 @@
                             font_size: 25
                             size_hint: .8, .65
                             on_press:
+                                root.history.append('Ranker')
                                 _screen_manager.current = 'QueryInput'
 
-            Screen:
-                name: 'LoadQueries'
-                FloatLayout:
-                    orientation: 'vertical'
-                    padding: 50
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint: .9, 1
-                        pos: 35,0
-                        spacing: 10
-                        Label:
-                            text: "[b]Load Queries to the database[/b]"
-                            font_size: 50
-                            size_hint: 1, .2
-                            markup: True
-                        Label:
-                            text: "Choose the source file please:"
-                            font_size: 30
-                            size_hint: 1, .15
-                        FileChooserListView:
-                            id: file2
-                            size_hint: 1, 1
-                            filters: ['*.xml']
-                            file_encodings: ['utf-8', 'windows-1255']
-                            multiselect: False
-                            rootpath: "C:\Users\Tutzy\desktop"
-                            on_selection: root.path = self.selection and self.selection[0] or ''
-                        AnchorLayout:
-                            size_hint: 1, .3
-                            anchor_x: 'center'
-                            Button:
-                                text: 'Submit'
-                                font_size: 35
-                                size_hint: .3, .5
-                                on_press:
-                                    root.Load_Queries(root.path)
-                                    _screen_manager.current = 'MainScreen'
             Screen:
                 name: 'RunQueriesMenu'
                 BoxLayout:
                     orientation: 'vertical'
                     padding: 150, 50
-                    spacing: 5
+                    spacing: 20
                     Label:
                         text: "[b]Run queries from the database[/b]"
-                        font_size: 30
+                        font_size: 40
                         markup: True
                         size_hint: 1, .2
-                    BoxLayout:
-                        orientation: 'horizontal'
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'bottom'
                         Button:
                             text: "Show results on the screen"
-                            font_size: 35
+                            font_size: 25
+                            size_hint: 1, .7
                             on_press:
                                 sl.text = root.Ranker_Environment.runQueries(limit=root.limit)
+                                root.history.append('RunQueriesMenu')
                                 _screen_manager.current = 'OutputScreen'
-                    BoxLayout:
-                        orientation: 'horizontal'
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'top'
                         Button:
                             text: "Save results to file"
-                            font_size: 30
+                            font_size: 25
+                            size_hint: 1, .7
                             on_press:
                                 root.Run_Queries_File(root.limit)
+                                root.history.append('RunQueriesMenu')
                                 _screen_manager.current = 'MainScreen'
-            Screen:
-                name: 'RunQueriesFile'
-                FloatLayout:
-                    orientation: 'vertical'
-                    padding: 50
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint: .9, 1
-                        pos: 35,0
-                        spacing: 10
-                        Label:
-                            text: "[b]Run queries - Save results to file[/b]"
-                            font_size: 50
-                            size_hint: 1, .2
-                            markup: True
-                        Label:
-                            text: "Choose the directory to save the file:"
-                            font_size: 30
-                            size_hint: 1, .15
-                        FileChooserListView:
-                            id: file2
-                            size_hint: 1, 1
-                            file_encodings: ['utf-8', 'windows-1255']
-                            multiselect: False
-                            dirselect: True
-                            rootpath: "C:\Users\Tutzy\desktop"
-                            filters: [root.is_dir]
-                            on_selection: root.path = self.selection and self.selection[0] or ''
-                        BoxLayout:
-                            orientation: 'horizontal'
-                            size_hint: 1, .14
-                            Label:
-                                text: "Please enter a name for the new file:"
-                                font_size: 20
-                            TextInput:
-                                id: FileName1
-                                hint_text: "Name"
-                                font_size: 20
-                                multiline: False
-                        BoxLayout:
-                            orientation: 'horizontal'
-                            size_hint: 1, .25
-                            Label:
-                                text: "How many documents would you like \nto appear in the result list?"
-                                font_size: 20
-                            TextInput:
-                                id: Limit1
-                                hint_text: "Insert limit... (insert 0 to unlimit)"
-                                font_size: 20
-                                input_filter: 'int'
-                                multiline: False
-                        AnchorLayout:
-                            size_hint: 1, .3
-                            anchor_x: 'center'
-                            Button:
-                                text: 'Submit'
-                                font_size: 35
-                                size_hint: .3, .5
-                                on_press:
-                                    root.Run_Queries_File(root.path, FileName1.text, Limit1.text)
-                                    _screen_manager.current = 'MainScreen'
+
             Screen:
                 name: 'RunQueryMenu'
                 BoxLayout:
                     orientation: 'vertical'
                     padding: 150, 50
-                    spacing: 5
+                    spacing: 20
                     Label:
                         text: "[b]Run query[/b]"
-                        font_size: 40
+                        font_size: 50
                         markup: True
                         size_hint: 1, .2
-                    BoxLayout:
-                        orientation: 'horizontal'
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'bottom'
                         Button:
                             text: "Show results on the screen"
-                            font_size: 35
+                            font_size: 25
+                            size_hint: 1, .7
                             on_press:
                                 sl.text = root.Ranker_Environment.runQuery(query=InputQuery.text, limit=root.limit)
+                                root.history.append('RunQueryMenu')
                                 _screen_manager.current = 'OutputScreen'
-                    BoxLayout:
-                        orientation: 'horizontal'
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'top'
                         Button:
                             text: "Save results to file"
-                            font_size: 30
+                            font_size: 25
+                            size_hint: 1, .7
                             on_press:
                                 root.Run_Query_File(InputQuery.text, limit=root.limit)
+                                root.history.append('RunQueryMenu')
                                 _screen_manager.current = 'MainScreen'
-            Screen:
-                name: 'RunQueryFile'
-                FloatLayout:
-                    orientation: 'vertical'
-                    padding: 50
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint: .9, 1
-                        pos: 35,0
-                        spacing: 10
-                        Label:
-                            text: "[b]Run query - Save results to file[/b]"
-                            font_size: 50
-                            size_hint: 1, .2
-                            markup: True
-                        Label:
-                            text: "Choose the directory to save the file:"
-                            font_size: 30
-                            size_hint: 1, .15
-                        FileChooserListView:
-                            id: file3
-                            size_hint: 1, 1
-                            file_encodings: ['utf-8', 'windows-1255']
-                            multiselect: False
-                            dirselect: True
-                            filters: [root.is_dir]
-                            on_selection: root.path = self.selection and self.selection[0] or ''
-                        BoxLayout:
-                            orientation: 'horizontal'
-                            size_hint: 1, .14
-                            Label:
-                                text: "Please enter a name for the new file:"
-                                font_size: 20
-                            TextInput:
-                                id: FileName2
-                                hint_text: "Name"
-                                font_size: 20
-                                multiline: False
-                        AnchorLayout:
-                            size_hint: 1, .3
-                            anchor_x: 'center'
-                            Button:
-                                text: 'Submit'
-                                font_size: 35
-                                size_hint: .3, .5
-                                on_press:
-                                    root.Run_Query_File(InputQuery.text, root.path, FileName2.text, Limit2.text)
-                                    _screen_manager.current = 'MainScreen'
 
             Screen:
                 name: 'QueryInput'
-                FloatLayout:
+                BoxLayout:
                     orientation: 'vertical'
-                    padding: 50
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint: .9, .9
-                        pos: 35,0
-                        spacing: 15
+                    spacing: 5
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'bottom'
+                        size_hint: 1, .2
                         Label:
                             text: "[b]Run Query[/b]"
                             font_size: 50
                             markup: True
-                            size_hint: 1, .1
-                        BoxLayout:
-                            orientation: 'horizontal'
-                            size_hint: 1, .4
-                            Label:
-                                text: "Please insert the query:"
-                                font_size: 20
-                            TextInput:
-                                id: InputQuery
-                                hint_text: "Query..."
-                                font_size: 20
-                                multiline: True
-                        AnchorLayout:
-                            size_hint: 1, .4
-                            anchor_x: 'center'
-                            Button:
-                                text: 'Submit'
-                                font_size: 35
-                                size_hint: .3, .3
-                                on_press:
-                                    root.Get_Limit()
-                                    _screen_manager.current = 'RunQueryMenu'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: "Please insert the query:"
+                            font_size: 20
+                            size_hint: .6, 1
+                        TextInput:
+                            id: InputQuery
+                            hint_text: "Query..."
+                            font_size: 20
+                            multiline: True
+                            size_hint_y: .8
+                    AnchorLayout:
+                        size_hint: 1, .4
+                        anchor_x: 'center'
+                        Button:
+                            text: 'Submit'
+                            font_size: 35
+                            size_hint: .3, .4
+                            on_press:
+                                root.Get_Limit()
+                                root.history.append('QueryInput')
+                                _screen_manager.current = 'RunQueryMenu'
             Screen:
                 name: 'OutputScreen'
                 BoxLayout:
@@ -391,7 +244,8 @@
                 BoxLayout:
                     orientation: 'vertical'
                     Label:
-                        text: 'Get metadata of the index'
+                        text: '[b]Get metadata of the index[/b]'
+                        markup: True
                         font_size: 40
                         size_hint: 1, .7
                     Label:
@@ -456,8 +310,9 @@
                 BoxLayout:
                     orientation: 'vertical'
                     Label:
-                        text: 'Get metadata of the queries database'
-                        font_size: 40
+                        text: '[b]Get metadata of the queries database[/b]'
+                        markup: True
+                        font_size: 34
                         size_hint: 1, .7
                     Label:
                         text: "The current number of queries in the database: " + root.Queries_Count
@@ -521,13 +376,3 @@
                 Label:
                     text: 'templeteScreen'
 
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'bottom'
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint: .4, .1
-            Button:
-                text: 'Go to the main menu'
-                font_size: 25
-                on_press: _screen_manager.current = 'MainScreen'
