@@ -1,7 +1,6 @@
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 import re
-from string import lower as lowC
 
 
 class Query:
