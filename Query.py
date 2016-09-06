@@ -52,6 +52,6 @@ class Query:
         for i in range(len(TextVec)) :
             term = TextVec[i]
             stem = st.stem(term)
-            self.addTerm(term, i)
-            self.addStem(stem, i)
+            self.addTerm(term.lower(), i)
+            self.addStem(stem.lower(), i)
         return
