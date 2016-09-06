@@ -270,7 +270,6 @@ class IndexEnvironment:
         :exceptions: trows an exception if the query is empty (or contains only spaces) and if the input
         limit is bigger then the amount of Documents inside the Index
         """
-        query = query.lower()
         if not query.strip():
             raise Exception('the query is empty')
         elif limit > self.documentCount():
