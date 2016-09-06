@@ -97,10 +97,10 @@ class IndexEnvironment:
         TextVec = filter(None, TextVec)
         st = PorterStemmer()
         for i in range(len(TextVec)) :
-            term = TextVec[i]
-            stem = st.stem(term)
-            Doc.addTerm(term.lower(), i)
-            Doc.addStem(stem.lower(), i)
+            term = TextVec[i].lower()
+            stem = st.stem(term).lower()
+            Doc.addTerm(term, i)
+            Doc.addStem(stem, i)
         self.Update_Index(Doc)
         return
 
