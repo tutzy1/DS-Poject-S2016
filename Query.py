@@ -50,8 +50,8 @@ class Query:
         TextVec = filter(None, TextVec)
         st = PorterStemmer()
         for i in range(len(TextVec)) :
-            term = TextVec[i]
-            stem = st.stem(term)
+            term = TextVec[i].lower()
+            stem = str(st.stem(term))
             self.addTerm(term, i)
             self.addStem(stem, i)
         return
