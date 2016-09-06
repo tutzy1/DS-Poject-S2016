@@ -1,6 +1,7 @@
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 import re
+from string import lower as lowC
 
 
 class Query:
@@ -50,8 +51,8 @@ class Query:
         TextVec = filter(None, TextVec)
         st = PorterStemmer()
         for i in range(len(TextVec)) :
-            term = TextVec[i].lower()
-            stem = st.stem(term).lower()
+            term = TextVec[i]
+            stem = st.stem(term)
             self.addTerm(term, i)
             self.addStem(stem, i)
         return

@@ -96,9 +96,9 @@ class IndexEnvironment:
         TextVec = re.split("\s|[!-&]|[(-/]|[:-@]|[[-`]|[{-~]|(?='s)|[']", Text)
         TextVec = filter(None, TextVec)
         st = PorterStemmer()
-        for i in range(len(TextVec)) :
-            term = TextVec[i].lower()
-            stem = st.stem(term).lower()
+        for i in range(len(TextVec)):
+            term = TextVec[i]
+            stem = st.stem(term)
             Doc.addTerm(term, i)
             Doc.addStem(stem, i)
         self.Update_Index(Doc)

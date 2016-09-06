@@ -1,5 +1,6 @@
 import numpy as np
 from nltk.stem.porter import PorterStemmer
+from string import lower as lowCf
 
 class Document:
     def __init__(self, Doc_ID, Text):
@@ -17,7 +18,7 @@ class Document:
         """
         if Term in self.Terms:
             self.Terms[Term] = np.append(self.Terms[Term],(position))
-        else :
+        else:
             self.Terms[Term] = np.array(position)
         return
 
