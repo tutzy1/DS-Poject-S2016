@@ -70,6 +70,14 @@
                                 root.Queries_Count = str(len(root.Ranker_Environment.getQueriesMetadata('number')))
                                 root.history.append('MainScreen')
                                 _screen_manager.current = 'QueriesDetails'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Button:
+                            text: "Go to the pickle manager"
+                            font_size: 25
+                            on_press:
+                                root.history.append('MainScreen')
+                                _screen_manager.current = 'PickleManager'
 
             Screen:
                 name: 'Ranker'
@@ -372,7 +380,36 @@
                             value: sp(14)
 
             Screen:
-                name: 'templeteScreen'
-                Label:
-                    text: 'templeteScreen'
+                name: 'PickleManager'
+                BoxLayout:
+                    orientation: 'vertical'
+                    padding: 150, 50
+                    spacing: 20
+                    Label:
+                        text: "[b]Pickle Manager[/b]"
+                        font_size: 50
+                        markup: True
+                        size_hint: 1, .2
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'bottom'
+                        Button:
+                            text: "Load index from pickle"
+                            font_size: 25
+                            size_hint: 1, .7
+                            on_press:
+                                root.Load_Pickle()
+                                root.history.append('PickleManager')
+                                _screen_manager.current = 'MainScreen'
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'top'
+                        Button:
+                            text: "Save index to pickle"
+                            font_size: 25
+                            size_hint: 1, .7
+                            on_press:
+                                root.Save_to_pickle()
+                                root.history.append('PickleManager')
+                                _screen_manager.current = 'MainScreen'
 

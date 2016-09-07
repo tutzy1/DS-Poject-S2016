@@ -11,6 +11,7 @@ from Index import *
 from Document import *
 from Query import *
 from os.path import join, isdir
+import pickle
 
 
 
@@ -122,6 +123,32 @@ class Menu(FloatLayout):
         for query in queries:
             result = result + query + "\n\n"
         return result
+
+    def Load_Pickle(self):
+        XFileOpen(on_dismiss=self.loadPickle_filepopup_callback, path=expanduser(u'~'), multiselect=False)
+        return
+
+    def loadPickle_filepopup_callback(self, instance):
+        if instance.is_canceled():
+            return
+        f = open(instance.selection[0], 'rb')
+        self.Index = pickle.load(f)
+        f.close()
+        s = 'The Pickle was uploaded'
+        s += ('\nSelection: %s' % instance.selection[0])
+        XMessage(title='Pressed button: ' + instance.button_pressed, text=s)
+
+    def Save_to_pickle(self):
+        XFileSave(on_dismiss=self._filepopup_SavePickle_callback, path=expanduser(u'~'))
+        return
+
+    def _filepopup_SavePickle_callback(self, instance):
+        if instance.is_canceled():
+            return
+        self.Index.Put_Index_In_Pickle(pathname=instance.get_full_name())
+        s = 'The index was saved to pickle!'
+        s += ('\nFilename: %s\nFull path: %s' % (instance.filename, instance.get_full_name()))
+        XMessage(title='Pressed button: ' + instance.button_pressed, text=s)
 
 
     def is_dir(self, directory, filename):

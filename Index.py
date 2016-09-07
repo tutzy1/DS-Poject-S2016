@@ -276,26 +276,6 @@ class IndexEnvironment:
         elif limit > self.documentCount():
             raise Exception('limit is bigger then amount of documents inside the Index')
         InputQuery = Query('TempQuery',query) # creates a temp Query without updating Ranker
-        """
-        ranklist = []
-        for key in self.DocIndex:
-            query_tfidf = np.array(0) # the zero just for initialize, doesn't have effect on result
-            doc_tfidf = np.array(0)  # the zero just for initialize, doesn't have effect on result
-            for key1 in InputQuery.Stems :
-                if key1 in self.DocIndex[key].Stems: # creats the Tf_Idf vector only for words that are inside the query and Doc
-                    idf = self.Idf_For_Stem(key1)
-                    query_tfidf = np.append(query_tfidf, InputQuery.Tf_For_Stem(key1)*idf)
-                    doc_tfidf = np.append(doc_tfidf, self.DocIndex[key].Tf_For_Stem(key1)*idf)
-            if np.count_nonzero(doc_tfidf) == 0 or  np.count_nonzero(query_tfidf) == 0:# checks there's no division by 0 in cosine calculation
-                CosinSimilarity = 0 # need to find out if exception is needed
-            else:
-                CosinSimilarity =  1.0 - spatial.distance.cosine(doc_tfidf, query_tfidf)
-            if isnan(CosinSimilarity):
-                CosinSimilarity = 0
-            ranklist.append((self.DocIndex[key], CosinSimilarity))
-        ranklist.sort(key=lambda tup: tup[1], reverse=True) # sorts in reverse order according to CosinSimilarity
-        resultlist = []
-        """
         ranker = RankerEnvironment(self)
         ranklist = ranker.Rank(InputQuery, limit)
         resultlist = []
@@ -325,85 +305,7 @@ class IndexEnvironment:
         """
         :param pathname: type - string - a pathname to a file
         :return: stores the Index into the file from pathname
-        :exceptions: throws an Exception if the file from pathname is not found
         """
-        try:
-            f = open(pathname, 'wb')
-        except (OSError, IOError) as e:
-            raise Exception("file from -'", pathname, "'is not found")
-        else:
-            pickle.dump(self.Index, f)
-            f.close()
-
-
-
-
-
-#**************----tests---******************
-#try:
- #   Index.getDocuments(['hey','123','zubi'])
-#except Exception as e:
- #   print(e)
-#*********************************************
-#for keys,values in Index.DocIndex.items():
-#    print(keys)
-#for keys,values in Index.DocIndex['hey'].Terms.items():
-#   print(keys,values)
-#print ('123:')
-#for keys, values in Index.DocIndex['999'].Terms.items():
-#   print(keys, values)
-#print ('stems:')
-#for keys, values in Index.DocIndex['hey'].Stems.items():
-#   print(keys, values)
-#print ('123:')
-#for keys, values in Index.DocIndex['123'].Stems.items():
- #   print(keys, values)
-#print("index:")
-#for keys,values in Index.ITerms.items():
-#    print(keys,values)
-#print ('stems:')
-#for keys,values in Index.IStems.items():
- #   print(keys, values)
- #*******************************************
-#a = Index.DocIndex['hey'].Textlen
-#b =Index.DocIndex['123'].RestoreText()
-#print (a,b)
-#*************************************************
-#try:
-#    y = Index.getDocumentsMetadata('TExT')
-#except Exception as e:
-#    print (e)
-#else :
-#    for i in range (len(y)):
-#        print y[i]
-#**************************************************
-#print(Index.termCount())
-#print(Index.termCount('5'))
-#print(Index.stemCount())
-#print(Index.stemCount('it'))
-# *************************************************
-#print(Index.documentCount())
-#print(Index.documentCount('hey'))
-#print(Index.documentStemCount('walk'))
-#**************************************************
-#print(Index.documentLength('123'))
-#**************************************************
-#a = ['hey','123']
-#lis = Index.getDocuments(a)
-#for i in range(len(lis)):
-#    print a[i]
-#    print lis[i]['terms']
-#    print lis[i]['stems']
-#    print lis[i]['termsPositions']
-#    print lis[i]['stemsPositions']
-
-#************************************************************
-#print Index.UniqueTermsInIndex()
-#print Index.UniqueStemsInIndex()
-#***********************************************************
-#list = Index.runQuery('hello in haifa i walk" very am')
-#for i in range(len(list)):
-#    print list[i]
-#ranker = RankerEnvironment(Index)
-#ranker.loadQueries("C:/Users/Ziv/Desktop/q.xml")
-#ranker.runQuery('1',None,'C:/Users/Ziv/Desktop/jg')
+        f = open(pathname, 'wb')
+        pickle.dump(self, f)
+        f.close()
