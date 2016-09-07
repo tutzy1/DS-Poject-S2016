@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 import re
+import pickle
 from math import log10
 from math import isnan
 from math import pow
@@ -319,6 +320,21 @@ class IndexEnvironment:
                 doc.Tf_Idf_Ranks[stem] = tf*idf
         self.Tf_Idf_Flag = 1
         return
+
+    def Put_Index_In_Pickle(self, pathname):
+        """
+        :param pathname: type - string - a pathname to a file
+        :return: stores the Index into the file from pathname
+        :exceptions: throws an Exception if the file from pathname is not found
+        """
+        try:
+            f = open(pathname, 'wb')
+        except (OSError, IOError) as e:
+            raise Exception("file from -'", pathname, "'is not found")
+        else:
+            pickle.dump(self.Index, f)
+            f.close()
+
 
 
 
