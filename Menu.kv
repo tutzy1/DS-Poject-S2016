@@ -152,7 +152,7 @@
                             font_size: 25
                             size_hint: 1, .7
                             on_press:
-                                root.Run_Queries_File(root.limit)
+                                root.Run_Queries_File()
                                 root.history.append('RunQueriesMenu')
                                 _screen_manager.current = 'MainScreen'
 
@@ -186,7 +186,7 @@
                             font_size: 25
                             size_hint: 1, .7
                             on_press:
-                                root.Run_Query_File(InputQuery.text, limit=root.limit)
+                                root.Run_Query_File(InputQuery.text)
                                 root.history.append('RunQueryMenu')
                                 _screen_manager.current = 'MainScreen'
 
