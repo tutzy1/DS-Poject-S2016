@@ -172,10 +172,9 @@ class Menu(FloatLayout):
         """
         :return: string contains all the documents in the index.
         """
-        docs = self.Index.getDocumentsMetadata(metaData='TEXT')
         result = ""
-        for doc in docs:
-            result = result + doc + "\n\n"
+        for key,val in self.Index.DocIndex.items():
+            result = result + "Document ID: " + str(key) + "\n-------------------------------\n" + str(val.Text) + "\n===================End Of Document==================\n\n"
         return result
 
     def PrintQueriesIDs(self):
@@ -193,10 +192,9 @@ class Menu(FloatLayout):
         """
         :return: string contains all the queries in the database.
         """
-        queries = self.Ranker_Environment.getQueriesMetadata('text')
         result = ""
-        for query in queries:
-            result = result + query + "\n\n"
+        for key,val in self.Ranker_Environment.QueriesDict.items():
+            result = result + "Query ID: " + str(key) + "\n-------------------------------\n" + str(val.Text) + "\n===================End Of Query==================\n\n"
         return result
 
     def Load_Pickle(self):
