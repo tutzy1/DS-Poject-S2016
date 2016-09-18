@@ -1,10 +1,10 @@
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import StringProperty
-from kivy.garden.scrolllabel import ScrollLabel
-from kivy.garden.xpopup.file import XFileOpen, XFileSave
-from kivy.garden.xpopup.form import XTextInput
-from kivy.garden.xpopup.notification import XMessage
+from scrolllabel import ScrollLabel
+from file import XFileOpen, XFileSave
+from form import XTextInput
+from notification import XMessage
 from os.path import expanduser
 from Ranker import *
 from Index import *
